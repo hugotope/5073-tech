@@ -1,0 +1,192 @@
+1. COPILOT - DATABASE:
+
+  hugotope: crea esta base de datos:
+  
+  2. Disseny de la base de dades i diagrama entitat-relació
+  Per dur a terme aquesta pràctica, necessites definir un esquema de base de dades que permeti emmagatzemar els productes que ven TechShop, les comandes que fan els usuaris i els detalls de cada comanda. Utilitzarem SQLite perquè és senzill de configurar i no requereix instal·lació de servidor. Les taules principals seran: 
+  Product: gestiona la llista de productes disponibles. Camps: 
+  id: INTEGER, clau primària, autoincremental. 
+  name: VARCHAR(100), nom del producte. 
+  price: DECIMAL(10,2), preu del producte. 
+  stock: INTEGER, unitats disponibles en inventari. 
+  
+  User: conté la informació de l’usuari que fa la compra. Camps: 
+  id: INTEGER, clau primària, autoincremental. 
+  username: VARCHAR(20), nom d’usuari (entre 4 i 20 caràcters). 
+  password_hash: VARCHAR(60), contrasenya codificada de manera segura (no s’emmagatzema la contrasenya en text pla). 
+  email: VARCHAR(100), adreça de correu electrònic. 
+  created_at: DATETIME, data i hora de creació del compte. 
+  Order: representa cada comanda realitzada. Camps: 
+  id: INTEGER, clau primària, autoincremental. 
+  total: DECIMAL(10,2), total de la comanda. 
+  created_at: DATETIME, data i hora de la comanda. 
+  user_id: INTEGER, clau forana que apunta a User(id). 
+  OrderItem: especifica els productes que formen part d’una comanda. Camps: 
+  id: INTEGER, clau primària, autoincremental. 
+  order_id: INTEGER, clau forana cap a Order(id). 
+  product_id: INTEGER, clau forana cap a Product(id). 
+  quantity: INTEGER, quantitat d’aquest producte en la comanda. 
+  A continuació es mostra el diagrama de classes que sintetitza les entitats i les relacions. Observa que un User pot tenir moltes comandes (Order), cada Order pot contenir molts elements (OrderItem) i cada OrderItem referencia un sol Product. 
+  
+  Recorda que, com a part de la pràctica, hauràs d’incloure’l en la documentació de lliurament.
+  
+  
+  GitHub Copilot: I will (1) create a tracked todo list, (2) add the SQL schema, init script, ER diagram (DOT), and README files in database, then (3) run the init script to create and seed the SQLite DB and report results. Expected outcome: new files added and a created `db.sqlite3` database.
+  
+  I'll start by writing the todo list with the first item marked in-progress. 
+  
+  Created 4 todos
+  
+  Next, I'll create the SQL schema, Python init script, ER diagram (DOT), and README files under database. The expected outcome is new files added to that folder. 
+  
+  Using "Apply Patch"
+  
+  
+  ```
+  
+  ```
+  Now I'll add the Python init script `init_db.py` to create and seed the SQLite database, plus an ER diagram file `erd.dot` and `README.md` in Catalan. 
+  
+  Using "Apply Patch"
+  
+  
+  ```
+  
+  ```
+  
+  
+  Using "Apply Patch"
+  
+  
+  ```
+  
+  ```
+  
+  
+  Using "Apply Patch"
+  
+  
+  ```
+  
+  ```
+  Progress update: I created four files in back-end/database: `schema.sql`, `init_db.py`, `erd.dot`, and `README.md`. Next I'll run the init script to create the SQLite database and verify the tables. I'll execute the script in a terminal. 
+  
+  Ran terminal command: cd C:\Users\D3T\VS\5073-tech\back-end\database; python .\init_db.py
+  
+  I'll (1) update the todo list to reflect progress, then (2) fix `init_db.py` to remove the malformed SQL and instead print created tables and counts; finally I'll re-run the init script to verify the database is created. Expect: no error and `db.sqlite3` present with tables. 
+  
+  Starting (3/4) *Executar i verificar la base de dades*
+  
+  I'll fix the `init_db.py` script to remove the broken query and instead query sqlite_master correctly. Then I'll run the script again. 
+  
+  Using "Apply Patch"
+  
+  
+  ```
+  
+  ```
+  
+  
+  Ran terminal command: python .\init_db.py
+  
+  I'll update `init_db.py` to remove any existing `db.sqlite3` before creating a fresh one so the script is idempotent, then re-run it. 
+  
+  Using "Apply Patch"
+  
+  
+  ```
+  
+  ```
+  
+  
+  Ran terminal command: python .\init_db.py
+  
+  I'll check the workspace for any syntax or lint errors across files to ensure changes didn't introduce problems. Expected outcome: no errors reported. 
+  
+  Checked workspace, no problems found
+  
+  He creado la base de dades SQLite, los scripts y la documentación solicitada y verifiqué que se crea correctamente. A continuación resumo lo que añadí y cómo usarlo.
+  
+  ## Acciones realizadas
+  - Añadí el esquema SQL con las tablas Product, UserAccount (User renombrado para evitar palabra reservada), Order y OrderItem.
+  - Añadí un script Python `init_db.py` que crea (y recrea de forma idempotente) `db.sqlite3`, aplica `schema.sql` y inserta datos de ejemplo.
+  - Añadí un diagrama ER en formato Graphviz DOT (`erd.dot`).
+  - Añadí un `README.md` (en catalán) con descripción del esquema y pasos para ejecutar.
+  - Ejecuté `init_db.py` en tu entorno y verifiqué que la base de datos se creó y contiene la comanda de ejemplo.
+  
+  ## Archivos creados (ruta relativa)
+  - schema.sql — Esquema SQLite con constraints y índices.
+  - init_db.py — Script para inicializar y poblar DB (crea `db.sqlite3`).
+  - erd.dot — Diagrama ER en Graphviz DOT.
+  - README.md — Documentación en Català con instrucciones y notas.
+  
+  ## Notas sobre el esquema
+  - Product:
+    - id INTEGER PRIMARY KEY AUTOINCREMENT
+    - name VARCHAR(100) NOT NULL
+    - price DECIMAL(10,2) NOT NULL CHECK(price >= 0)
+    - stock INTEGER NOT NULL CHECK(stock >= 0)
+  - UserAccount:
+    - id INTEGER PRIMARY KEY AUTOINCREMENT
+    - username VARCHAR(20) NOT NULL UNIQUE CHECK(length(username) BETWEEN 4 AND 20)
+    - password_hash VARCHAR(60) NOT NULL
+    - email VARCHAR(100) NOT NULL UNIQUE
+    - created_at DATETIME DEFAULT datetime('now')
+  - Order:
+    - id INTEGER PRIMARY KEY AUTOINCREMENT
+    - total DECIMAL(10,2) NOT NULL
+    - created_at DATETIME DEFAULT datetime('now')
+    - user_id INTEGER FK -> UserAccount(id) ON DELETE CASCADE
+  - OrderItem:
+    - id INTEGER PRIMARY KEY AUTOINCREMENT
+    - order_id INTEGER FK -> Order(id) ON DELETE CASCADE
+    - product_id INTEGER FK -> Product(id) ON DELETE RESTRICT
+    - quantity INTEGER NOT NULL CHECK(quantity > 0)
+  
+  Relaciones:
+  - Un UserAccount puede tener muchas Orders.
+  - Una Order tiene muchos OrderItems.
+  - Cada OrderItem referencia un Product.
+  
+  He usado `UserAccount` como nombre de tabla para evitar conflictos con la palabra reservada `USER` en algunos RDBMS y para mejorar claridad.
+  
+  ## Cómo ejecutar (PowerShell en Windows)
+  Abre PowerShell y ejecuta:
+  ```powershell
+  cd C:\Users\D3T\VS\5073-tech\back-end\database
+  python .\init_db.py
+  ```
+  Esto creará (o recreará) `db.sqlite3` en la misma carpeta e insertará datos de ejemplo.
+  
+  Para generar una imagen del diagrama (si tienes Graphviz):
+  ```powershell
+  dot -Tpng erd.dot -o erd.png
+  ```
+  
+  ## Validación que hice
+  - Ejecuté `init_db.py`. Resultado: el script creó la DB y mostró el conteo de registros (por ejemplo: `Order: 1 registres`).
+  - Ejecuté una comprobación de errores del workspace (no se encontraron errores).
+  
+  ## Sugerencias / mejoras opcionales
+  - Usar bcrypt/argon2 para generar `password_hash` en el script real (en el ejemplo dejé un hash ficticio).
+  - Añadir un campo de estado en `Order` (pending/shipped/cancelled).
+  - Añadir triggers o procedimientos para decrementar `Product.stock` cuando se crea una Order y para restaurarlo si se cancela la Order.
+  - Añadir tests unitarios que verifiquen integridad referencial y cálculos de totales.
+  
+  ## To-do interno (estado)
+  - Crear esquema y diagrama — completado
+  - Añadir script de inicialización — completado
+  - Ejecutar y verificar la base de datos — completado
+  - Añadir documentación — completado
+  
+  Si quieres que:
+  - genere el diagrama `erd.png` aquí mismo (si tienes Graphviz instalado), o
+  - cambie el nombre `UserAccount` a `User` en todo (si prefieres), o
+  - añada triggers para gestionar stock, o
+  - cree endpoints (API) para manipular la base de datos (REST/Flask/FastAPI),
+  
+  dime cuál prefieres y lo implemento.
+  
+  Made changes.
+
+---------------------------------------------------------------------------------
