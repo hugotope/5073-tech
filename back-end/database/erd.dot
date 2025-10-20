@@ -1,0 +1,14 @@
+// Diagrama entitat-relació (simplificat) per a TechShop
+digraph ERD {
+  rankdir=LR;
+  node [shape=record];
+
+  Product [label="{Product|+ id: INTEGER\l+ name: VARCHAR(100)\l+ price: DECIMAL(10,2)\l+ stock: INTEGER\l}"];
+  UserAccount [label="{UserAccount|+ id: INTEGER\l+ username: VARCHAR(20)\l+ password_hash: VARCHAR(60)\l+ email: VARCHAR(100)\l+ created_at: DATETIME\l}"];
+  Order [label="{Order|+ id: INTEGER\l+ total: DECIMAL(10,2)\l+ created_at: DATETIME\l+ user_id: INTEGER\l}"];
+  OrderItem [label="{OrderItem|+ id: INTEGER\l+ order_id: INTEGER\l+ product_id: INTEGER\l+ quantity: INTEGER\l}"];
+
+  UserAccount -> Order [label="1..*" arrowhead=normal];
+  Order -> OrderItem [label="1..*" arrowhead=normal];
+  Product -> OrderItem [label="1..*" arrowhead=normal];
+}
