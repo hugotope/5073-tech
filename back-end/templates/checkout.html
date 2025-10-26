@@ -1,0 +1,152 @@
+{% extends "base.html" %}
+
+{% block title %}Finalitzar Compra - TechShop{% endblock %}
+
+{% block content %}
+<div class="checkout-header">
+    <h2>Finalitzar Compra</h2>
+</div>
+
+<div class="checkout-container">
+    <!-- Resum del carretó -->
+    <div class="checkout-summary">
+        <h3>Resum de la Compra</h3>
+        <table class="summary-table">
+            <thead>
+                <tr>
+                    <th>Producte</th>
+                    <th>Quantitat</th>
+                    <th>Preu Unitari</th>
+                    <th>Subtotal</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for item in cart_items %}
+                <tr>
+                    <td>{{ item.product.name }}</td>
+                    <td>{{ item.quantity }}</td>
+                    <td>{{ "%.2f"|format(item.product.price) }} €</td>
+                    <td>{{ "%.2f"|format(item.subtotal) }} €</td>
+                </tr>
+                {% endfor %}
+            </tbody>
+            <tfoot>
+                <tr class="total-row">
+                    <td colspan="3"><strong>Total:</strong></td>
+                    <td><strong>{{ "%.2f"|format(total) }} €</strong></td>
+                </tr>
+            </tfoot>
+        </table>
+    </div>
+
+    <!-- Formulari de checkout -->
+    <div class="checkout-form-container">
+        <h3>Dades de Contacte</h3>
+        <form method="POST" action="{{ url_for('checkout') }}" id="checkoutForm" class="checkout-form">
+            <!-- Nom d'usuari -->
+            <div class="form-group">
+                <label for="username">Nom d'usuari *</label>
+                <input 
+                    type="text" 
+                    id="username" 
+                    name="username" 
+                    required 
+                    minlength="4" 
+                    maxlength="20"
+                    pattern="[A-Za-z0-9_]{4,20}"
+                    title="Entre 4 i 20 caràcters (lletres, números o guions baixos)"
+                    class="form-control">
+                <small class="form-help">Entre 4 i 20 caràcters</small>
+            </div>
+
+            <!-- Contrasenya -->
+            <div class="form-group">
+                <label for="password">Contrasenya *</label>
+                <input 
+                    type="password" 
+                    id="password" 
+                    name="password" 
+                    required 
+                    minlength="8"
+                    title="Mínim 8 caràcters"
+                    class="form-control">
+                <small class="form-help">Mínim 8 caràcters</small>
+            </div>
+
+            <!-- Email -->
+            <div class="form-group">
+                <label for="email">Correu Electrònic *</label>
+                <input 
+                    type="email" 
+                    id="email" 
+                    name="email" 
+                    required
+                    pattern="[a-z0-9._%+-]+@[a-z0-9.-]+\.[a-z]{2,}$"
+                    title="Introdueix un correu electrònic vàlid"
+                    class="form-control">
+            </div>
+
+            <!-- Adreça d'enviament -->
+            <div class="form-group">
+                <label for="shipping_address">Adreça d'Enviament *</label>
+                <textarea 
+                    id="shipping_address" 
+                    name="shipping_address" 
+                    rows="3" 
+                    required
+                    minlength="10"
+                    title="Introdueix una adreça completa"
+                    class="form-control"></textarea>
+                <small class="form-help">Mínim 10 caràcters</small>
+            </div>
+
+            <div class="form-actions">
+                <button type="submit" class="btn btn-success btn-large">Confirmar Compra</button>
+                <a href="{{ url_for('cart') }}" class="btn btn-secondary">Tornar al Carretó</a>
+            </div>
+        </form>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+    // Validació addicional del client
+    document.getElementById('checkoutForm').addEventListener('submit', function(e) {
+        const username = document.getElementById('username').value;
+        const password = document.getElementById('password').value;
+        const email = document.getElementById('email').value;
+        const address = document.getElementById('shipping_address').value;
+
+        let errors = [];
+
+        // Validar username
+        if (username.length < 4 || username.length > 20) {
+            errors.push('El nom d\'usuari ha de tenir entre 4 i 20 caràcters');
+        }
+
+        // Validar password
+        if (password.length < 8) {
+            errors.push('La contrasenya ha de tenir com a mínim 8 caràcters');
+        }
+
+        // Validar email
+        const emailRegex = /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/;
+        if (!emailRegex.test(email)) {
+            errors.push('Correu electrònic no vàlid');
+        }
+
+        // Validar adreça
+        if (address.length < 10) {
+            errors.push('L\'adreça ha de tenir com a mínim 10 caràcters');
+        }
+
+        if (errors.length > 0) {
+            e.preventDefault();
+            alert('Errors de validació:\n' + errors.join('\n'));
+            return false;
+        }
+    });
+</script>
+{% endblock %}
+

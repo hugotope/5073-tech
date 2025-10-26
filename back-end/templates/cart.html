@@ -1,0 +1,61 @@
+{% extends "base.html" %}
+
+{% block title %}Carretó - TechShop{% endblock %}
+
+{% block content %}
+<div class="cart-header">
+    <h2>El teu Carretó</h2>
+</div>
+
+{% if cart_items %}
+<div class="cart-container">
+    <div class="cart-items">
+        <table class="cart-table">
+            <thead>
+                <tr>
+                    <th>Producte</th>
+                    <th>Preu Unitari</th>
+                    <th>Quantitat</th>
+                    <th>Subtotal</th>
+                    <th>Accions</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for item in cart_items %}
+                <tr>
+                    <td class="product-name">{{ item.product.name }}</td>
+                    <td class="product-price">{{ "%.2f"|format(item.product.price) }} €</td>
+                    <td class="product-quantity">{{ item.quantity }}</td>
+                    <td class="product-subtotal">{{ "%.2f"|format(item.subtotal) }} €</td>
+                    <td class="product-actions">
+                        <form method="POST" action="{{ url_for('remove_from_cart') }}" style="display: inline;">
+                            <input type="hidden" name="product_id" value="{{ item.product.id }}">
+                            <button type="submit" class="btn btn-danger btn-small">Eliminar</button>
+                        </form>
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+    
+    <div class="cart-summary">
+        <div class="summary-box">
+            <h3>Resum de la Compra</h3>
+            <div class="summary-item">
+                <span>Total:</span>
+                <span class="total-amount">{{ "%.2f"|format(total) }} €</span>
+            </div>
+            <a href="{{ url_for('checkout') }}" class="btn btn-success btn-large">Finalitzar Compra</a>
+            <a href="{{ url_for('index') }}" class="btn btn-secondary">Continuar Comprant</a>
+        </div>
+    </div>
+</div>
+{% else %}
+<div class="empty-cart">
+    <p class="empty-cart-message">El teu carretó està buit</p>
+    <a href="{{ url_for('index') }}" class="btn btn-primary">Començar a Compra</a>
+</div>
+{% endif %}
+{% endblock %}
+

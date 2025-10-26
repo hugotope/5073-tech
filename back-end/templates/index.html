@@ -1,0 +1,50 @@
+{% extends "base.html" %}
+
+{% block title %}Productes - TechShop{% endblock %}
+
+{% block content %}
+<div class="products-header">
+    <h2>Productes Disponibles</h2>
+    <p class="subtitle">Descobreix els nostres productes electrònics</p>
+</div>
+
+<div class="products-grid">
+    {% for product in products %}
+    <div class="product-card">
+        <div class="product-info">
+            <h3>{{ product.name }}</h3>
+            <p class="product-price">{{ "%.2f"|format(product.price) }} €</p>
+            <p class="product-stock">
+                {% if product.stock > 0 %}
+                    <span class="in-stock">✓ En stock ({{ product.stock }} unitats)</span>
+                {% else %}
+                    <span class="out-of-stock">✗ Sense stock</span>
+                {% endif %}
+            </p>
+        </div>
+        
+        {% if product.stock > 0 %}
+        <form method="POST" action="{{ url_for('add_to_cart') }}" class="add-to-cart-form" data-product-id="{{ product.id }}">
+            <input type="hidden" name="product_id" value="{{ product.id }}">
+            <div class="quantity-selector">
+                <label for="quantity-{{ product.id }}">Quantitat:</label>
+                <input 
+                    type="number" 
+                    id="quantity-{{ product.id }}" 
+                    name="quantity" 
+                    min="1" 
+                    max="5" 
+                    value="1" 
+                    required
+                    class="quantity-input">
+            </div>
+            <button type="submit" class="btn btn-primary">Afegir al Carretó</button>
+        </form>
+        {% else %}
+        <button disabled class="btn btn-disabled">Sense Stock</button>
+        {% endif %}
+    </div>
+    {% endfor %}
+</div>
+{% endblock %}
+
