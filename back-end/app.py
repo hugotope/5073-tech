@@ -21,6 +21,7 @@ from pathlib import Path
 from models import Product, Order, OrderItem, UserAccount
 from controllers import cart_controller
 from controllers import order_controller
+from controllers import recommendation_controller
 
 app = Flask(__name__)
 app.secret_key = 'techshop_secret_key_change_in_production'  # IMPORTANT: canviar en producció
@@ -31,9 +32,19 @@ DB_PATH = Path(__file__).parent / "database" / "db.sqlite3"
 
 @app.route('/')
 def index():
-    """Pàgina principal que mostra la llista de productes."""
+    """Pàgina principal que mostra la llista de productes i recomanacions."""
     products = Product.get_all(DB_PATH)
-    return render_template('index.html', products=products)
+    
+    # Obtenir recomanacions
+    # Intentem obtenir user_id de la sessió si existeix
+    user_id = session.get('user_id', None)
+    recommended_products = recommendation_controller.get_recommended_products(
+        user_id, DB_PATH, limit=5
+    )
+    
+    return render_template('index.html', 
+                         products=products, 
+                         recommended_products=recommended_products)
 
 
 @app.route('/cart')
@@ -204,6 +215,12 @@ def checkout():
                 email=email,
                 db_path=DB_PATH
             )
+            
+            # Guardar user_id a la sessió per a recomanacions
+            user = UserAccount.get_by_username(username, DB_PATH)
+            if user:
+                session['user_id'] = user.id
+                session['username'] = username
             
             # Netegem el carretó
             session['cart'] = {}

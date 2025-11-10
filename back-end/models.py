@@ -8,6 +8,7 @@ respectives entitats, separant així la lògica de dades de la lògica de negoci
 i de presentació.
 """
 import sqlite3
+import hashlib
 from dataclasses import dataclass
 from datetime import datetime
 from typing import List, Optional
@@ -132,6 +133,31 @@ class UserAccount:
             if row:
                 return UserAccount(**dict(row))
             return None
+    
+    @staticmethod
+    def authenticate(username: str, password: str, db_path: Path) -> Optional['UserAccount']:
+        """Autentica un usuari amb el nom d'usuari i contrasenya.
+        
+        Args:
+            username: nom d'usuari
+            password: contrasenya en text pla
+            db_path: ruta al fitxer de base de dades
+            
+        Returns:
+            Usuari autenticat o None si les credencials són incorrectes
+        """
+        user = UserAccount.get_by_username(username, db_path)
+        if user is None:
+            return None
+        
+        # Generar hash de la contrasenya proporcionada
+        password_hash = hashlib.sha256(password.encode()).hexdigest()
+        
+        # Comparar amb el hash emmagatzemat
+        if password_hash == user.password_hash:
+            return user
+        
+        return None
 
 
 @dataclass
