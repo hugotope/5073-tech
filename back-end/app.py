@@ -198,7 +198,7 @@ def checkout():
         try:
             # Crear usuari i comanda
             order_id = order_controller.create_order(
-                cart_items=cart_items,
+                cart_items,
                 username=username,
                 password=password,
                 email=email,
