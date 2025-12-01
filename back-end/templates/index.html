@@ -25,6 +25,7 @@
             {% if product.stock > 0 %}
             <form method="POST" action="{{ url_for('add_to_cart') }}" class="add-to-cart-form" data-product-id="{{ product.id }}">
                 <input type="hidden" name="product_id" value="{{ product.id }}">
+                <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
                 <div class="quantity-selector">
                     <label for="quantity-rec-{{ product.id }}">Quantitat:</label>
                     <input 
@@ -71,6 +72,7 @@
         {% if product.stock > 0 %}
         <form method="POST" action="{{ url_for('add_to_cart') }}" class="add-to-cart-form" data-product-id="{{ product.id }}">
             <input type="hidden" name="product_id" value="{{ product.id }}">
+            <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
             <div class="quantity-selector">
                 <label for="quantity-{{ product.id }}">Quantitat:</label>
                 <input 

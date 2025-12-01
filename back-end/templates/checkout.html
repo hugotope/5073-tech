@@ -43,6 +43,8 @@
     <div class="checkout-form-container">
         <h3>Dades de Contacte</h3>
         <form method="POST" action="{{ url_for('checkout') }}" id="checkoutForm" class="checkout-form">
+            <!-- Protecció CSRF bàsica -->
+            <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
             <!-- Nom d'usuari -->
             <div class="form-group">
                 <label for="username">Nom d'usuari *</label>

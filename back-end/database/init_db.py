@@ -6,6 +6,9 @@ insertarà dades d'exemple.
 import sqlite3
 import pathlib
 import csv
+import secrets
+
+from werkzeug.security import generate_password_hash
 
 HERE = pathlib.Path(__file__).parent
 DB_PATH = HERE / "db.sqlite3"
@@ -25,7 +28,6 @@ def init_db():
         print("Esquema aplicat.")
 
         cur = conn.cursor()
-        import hashlib
         
         # Inserir productes d'exemple (més productes per a recomanacions)
         products = [
@@ -44,10 +46,6 @@ def init_db():
         ]
         cur.executemany("INSERT INTO Product(name, price, stock) VALUES(?,?,?)", products)
 
-        # Funció helper per generar hash de contrasenya
-        def hash_password(password):
-            return hashlib.sha256(password.encode()).hexdigest()
-
         # Inserir usuaris d'exemple amb diferents patrons de compra
         users_data = [
             ("alumn01", "password123", "alumn01@example.com"),
@@ -60,9 +58,17 @@ def init_db():
         
         user_ids = []
         for username, password, email in users_data:
-            password_hash = hash_password(password)
-            cur.execute("INSERT INTO UserAccount(username, password_hash, email) VALUES(?,?,?)",
-                        (username, password_hash, email))
+            # Utilitzem el mateix mecanisme segur que en producció (PBKDF2 + salt pròpia)
+            salt = secrets.token_hex(16)
+            password_input = f"{salt}{password}"
+            password_hash = generate_password_hash(
+                password_input, method="pbkdf2:sha256", salt_length=16
+            )
+            cur.execute(
+                "INSERT INTO UserAccount(username, password_hash, salt, email) "
+                "VALUES(?,?,?,?)",
+                (username, password_hash, salt, email),
+            )
             user_ids.append(cur.lastrowid)
 
         # Crear comandes amb patrons de compra similars per a recomanacions

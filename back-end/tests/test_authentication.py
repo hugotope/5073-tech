@@ -4,10 +4,11 @@ Este módulo contiene las pruebas para el método authenticate de UserAccount.
 """
 import unittest
 import sqlite3
-import hashlib
 import tempfile
 from pathlib import Path
 import sys
+
+from werkzeug.security import generate_password_hash
 
 # Agregar el directorio padre al path para importar los modelos
 sys.path.insert(0, str(Path(__file__).parent.parent))
@@ -36,7 +37,8 @@ class TestAuthentication(unittest.TestCase):
                 CREATE TABLE IF NOT EXISTS UserAccount (
                     id INTEGER PRIMARY KEY AUTOINCREMENT,
                     username VARCHAR(20) NOT NULL UNIQUE CHECK(length(username) BETWEEN 4 AND 20),
-                    password_hash VARCHAR(60) NOT NULL,
+                    password_hash VARCHAR(255) NOT NULL,
+                    salt VARCHAR(64) NOT NULL,
                     email VARCHAR(100) NOT NULL UNIQUE,
                     created_at DATETIME NOT NULL DEFAULT (datetime('now'))
                 )
@@ -44,8 +46,11 @@ class TestAuthentication(unittest.TestCase):
             conn.commit()
         
         # Crear usuario de prueba 'alice' con password '1234'
-        password_hash_alice = hashlib.sha256('1234'.encode()).hexdigest()
-        UserAccount.create('alice', password_hash_alice, 'alice@example.com', self.db_path)
+        salt = "testsalt_alice"
+        password_hash_alice = generate_password_hash(
+            f"{salt}1234", method="pbkdf2:sha256", salt_length=16
+        )
+        UserAccount.create('alice', password_hash_alice, salt, 'alice@example.com', self.db_path)
     
     def tearDown(self):
         """Limpieza después de cada prueba.
@@ -108,9 +113,12 @@ class TestAuthentication(unittest.TestCase):
         Entrada: username='new_user', password='pass123'
         Resultado Esperado: El usuario se autentica correctamente y devuelve un objeto UserAccount.
         """
-        # Crear nuevo usuario
-        password_hash = hashlib.sha256('pass123'.encode()).hexdigest()
-        user_id = UserAccount.create('new_user', password_hash, 'new_user@example.com', self.db_path)
+        # Crear nuevo usuario utilizando el mismo esquema de hash que en producción
+        salt = "testsalt_new_user"
+        password_hash = generate_password_hash(
+            f"{salt}pass123", method="pbkdf2:sha256", salt_length=16
+        )
+        user_id = UserAccount.create('new_user', password_hash, salt, 'new_user@example.com', self.db_path)
         
         self.assertIsNotNone(user_id, "El usuario debería haberse creado correctamente")
         

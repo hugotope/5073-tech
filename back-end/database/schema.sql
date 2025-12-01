@@ -11,7 +11,8 @@ CREATE TABLE IF NOT EXISTS Product (
 CREATE TABLE IF NOT EXISTS UserAccount (
     id INTEGER PRIMARY KEY AUTOINCREMENT,
     username VARCHAR(20) NOT NULL UNIQUE CHECK(length(username) BETWEEN 4 AND 20),
-    password_hash VARCHAR(60) NOT NULL,
+    password_hash VARCHAR(255) NOT NULL,
+    salt VARCHAR(64) NOT NULL,
     email VARCHAR(100) NOT NULL UNIQUE,
     created_at DATETIME NOT NULL DEFAULT (datetime('now')),
     account_type CHAR(20),

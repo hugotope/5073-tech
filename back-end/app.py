@@ -14,20 +14,36 @@ Regles implementades:
 - Validar sempre les dades rebudes des del client abans de processar-les
 """
 from flask import Flask, render_template, request, redirect, url_for, session, flash
-import sqlite3
+import os
 from pathlib import Path
 
-# Importem models
+# Importem models i controladors
 from models import Product, Order, OrderItem, UserAccount
 from controllers import cart_controller
 from controllers import order_controller
 from controllers import recommendation_controller
+from services.cart_service import CartService
+from security import generate_csrf_token, validate_csrf
+from config.base import DevConfig, ProdConfig
 
 app = Flask(__name__)
-app.secret_key = 'techshop_secret_key_change_in_production'  # IMPORTANT: canviar en producció
 
-# Configuració de la base de dades
-DB_PATH = Path(__file__).parent / "database" / "db.sqlite3"
+# Configuració de seguretat i entorns (centralitzada a config/)
+env = os.environ.get("APP_ENV", "dev").lower()
+if env == "prod":
+    app.config.from_object(ProdConfig)
+else:
+    app.config.from_object(DevConfig)
+
+# CSRF bàsic: token a sessió i validació per POST
+app.jinja_env.globals["csrf_token"] = generate_csrf_token
+app.before_request(validate_csrf)
+
+# Configuració de la base de dades (a partir de la config d'entorn)
+DB_PATH = Path(app.config["DB_PATH"])
+
+# Servei optimitzat de carretó (evita N+1 queries)
+cart_service = CartService(DB_PATH)
 
 
 @app.route('/')
@@ -51,20 +67,10 @@ def index():
 def cart():
     """Mostra el carretó actual."""
     cart_items = session.get('cart', {})
-    products = Product.get_all(DB_PATH)
-    cart_details = []
-    total = 0
-    
-    for product_id, quantity in cart_items.items():
-        product = next((p for p in products if p.id == int(product_id)), None)
-        if product:
-            cart_details.append({
-                'product': product,
-                'quantity': quantity,
-                'subtotal': product.price * quantity
-            })
-            total += product.price * quantity
-    
+
+    # Utilitzem el servei optimitzat per evitar N+1 i centralitzar la lògica
+    cart_details, total = cart_service.get_cart_details(cart_items)
+
     return render_template('cart.html', cart_items=cart_details, total=total)
 
 
@@ -159,21 +165,10 @@ def checkout():
         if not cart_items:
             flash('El carretó està buit', 'info')
             return redirect(url_for('cart'))
-        
-        products = Product.get_all(DB_PATH)
-        cart_details = []
-        total = 0
-        
-        for product_id, quantity in cart_items.items():
-            product = next((p for p in products if p.id == int(product_id)), None)
-            if product:
-                cart_details.append({
-                    'product': product,
-                    'quantity': quantity,
-                    'subtotal': product.price * quantity
-                })
-                total += product.price * quantity
-        
+
+        # Reutilitzem el servei de carretó per construir el resum
+        cart_details, total = cart_service.get_cart_details(cart_items)
+
         return render_template('checkout.html', cart_items=cart_details, total=total)
     
     else:  # POST

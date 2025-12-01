@@ -8,11 +8,38 @@ respectives entitats, separant així la lògica de dades de la lògica de negoci
 i de presentació.
 """
 import sqlite3
-import hashlib
 from dataclasses import dataclass
 from datetime import datetime
 from typing import List, Optional
 from pathlib import Path
+
+from werkzeug.security import check_password_hash
+import time
+from collections import defaultdict
+
+
+# Memòria simple en procés per protegir contra força bruta bàsica
+_FAILED_LOGINS = defaultdict(list)  # username -> [timestamps]
+_MAX_ATTEMPTS = 5
+_WINDOW_SECONDS = 60
+
+
+def _register_failed_login(username: str) -> None:
+    """Registra un intent fallit d'inici de sessió per a un usuari."""
+    now = time.time()
+    attempts = _FAILED_LOGINS[username]
+    # Eliminar intents fora de la finestra
+    _FAILED_LOGINS[username] = [ts for ts in attempts if now - ts <= _WINDOW_SECONDS]
+    _FAILED_LOGINS[username].append(now)
+
+
+def _is_rate_limited(username: str) -> bool:
+    """Comprova si un usuari ha superat el límit d'intents en la finestra definida."""
+    now = time.time()
+    attempts = _FAILED_LOGINS.get(username, [])
+    attempts = [ts for ts in attempts if now - ts <= _WINDOW_SECONDS]
+    _FAILED_LOGINS[username] = attempts
+    return len(attempts) >= _MAX_ATTEMPTS
 
 
 @dataclass
@@ -86,16 +113,18 @@ class UserAccount:
     id: int
     username: str
     password_hash: str
+    salt: str
     email: str
     created_at: str
     
     @staticmethod
-    def create(username: str, password_hash: str, email: str, db_path: Path) -> int:
+    def create(username: str, password_hash: str, salt: str, email: str, db_path: Path) -> int:
         """Crea un nou compte d'usuari.
         
         Args:
             username: nom d'usuari
-            password_hash: hash de la contrasenya
+            password_hash: hash de la contrasenya (incloent la salt)
+            salt: salt única per a aquest usuari
             email: correu electrònic
             db_path: ruta al fitxer de base de dades
             
@@ -108,8 +137,8 @@ class UserAccount:
         with sqlite3.connect(db_path) as conn:
             cur = conn.cursor()
             cur.execute(
-                "INSERT INTO UserAccount (username, password_hash, email) VALUES (?, ?, ?)",
-                (username, password_hash, email)
+                "INSERT INTO UserAccount (username, password_hash, salt, email) VALUES (?, ?, ?, ?)",
+                (username, password_hash, salt, email)
             )
             conn.commit()
             return cur.lastrowid
@@ -146,17 +175,25 @@ class UserAccount:
         Returns:
             Usuari autenticat o None si les credencials són incorrectes
         """
+        # Protecció bàsica contra força bruta per usuari
+        if _is_rate_limited(username):
+            return None
+
         user = UserAccount.get_by_username(username, db_path)
         if user is None:
             return None
-        
-        # Generar hash de la contrasenya proporcionada
-        password_hash = hashlib.sha256(password.encode()).hexdigest()
-        
-        # Comparar amb el hash emmagatzemat
-        if password_hash == user.password_hash:
+
+        # La contrasenya es deriva combinant una salt forta per usuari + password,
+        # posteriorment hashida amb PBKDF2 (vegeu create_order/init_db/tests).
+        candidate = f"{user.salt}{password}"
+
+        if check_password_hash(user.password_hash, candidate):
+            # Login correcte: netegem intents fallits
+            _FAILED_LOGINS.pop(username, None)
             return user
-        
+
+        # Registrem intent fallit
+        _register_failed_login(username)
         return None
 
 
