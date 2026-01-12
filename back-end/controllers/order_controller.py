@@ -36,31 +36,33 @@ def calculate_order_total(cart: Dict[str, int], db_path: Path) -> float:
     return total
 
 
-def create_order(cart: Dict[str, int], username: str, password: str, 
-                 email: str, db_path: Path) -> int:
+def create_order(cart: Dict[str, int], db_path: Path, 
+                 user_id: int = None, username: str = None, 
+                 password: str = None, email: str = None) -> int:
     """Crea una comanda i actualitza l'inventari.
     
     Aquesta funció encapçala tota la lògica de creació d'una comanda:
     1. Comprova que hi ha productes al carretó
     2. Valida el stock disponible per a cada producte
     3. Calcula el total de la comanda
-    4. Crea o obté l'usuari
+    4. Crea o obté l'usuari (si no s'ha proporcionat user_id)
     5. Crea la comanda
     6. Crea els elements de la comanda (OrderItems)
     7. Actualitza l'inventari dels productes
     
     Args:
         cart: diccionari amb product_id -> quantity
-        username: nom d'usuari
-        password: contrasenya (serà hashida)
-        email: correu electrònic
         db_path: ruta a la base de dades
+        user_id: ID de l'usuari autenticat (opcional)
+        username: nom d'usuari (necessari si no hi ha user_id)
+        password: contrasenya (necessària si no hi ha user_id)
+        email: correu electrònic (necessari si no hi ha user_id)
         
     Returns:
         ID de la comanda creada
         
     Raises:
-        ValueError: si el carretó està buit o si no hi ha stock suficient
+        ValueError: si el carretó està buit, si no hi ha stock suficient, o si falten dades d'usuari
         Exception: si hi ha un error al crear la comanda
     """
     import sqlite3
@@ -83,16 +85,28 @@ def create_order(cart: Dict[str, int], username: str, password: str,
                     )
                 total += product.price * quantity
             
-            # Crea o obté l'usuari
-            user = UserAccount.get_by_username(username, db_path)
-            
-            if user is None:
-                # Crear nou usuari
-                # NOTA: En producció, s'hauria d'utilitzar bcrypt o argon2
-                password_hash = hashlib.sha256(password.encode()).hexdigest()
-                user_id = UserAccount.create(username, password_hash, email, db_path)
+            # Obté o crea l'usuari
+            if user_id is not None:
+                # Usuari ja autenticat, només verificar que existeix
+                conn.row_factory = sqlite3.Row
+                cur = conn.cursor()
+                cur.execute("SELECT id FROM UserAccount WHERE id = ?", (user_id,))
+                if not cur.fetchone():
+                    raise ValueError(f"Usuari amb ID {user_id} no trobat")
             else:
-                user_id = user.id
+                # No hi ha usuari autenticat, cal crear-lo o obtenir-lo
+                if not username or not password or not email:
+                    raise ValueError("Falten dades d'usuari. Has d'iniciar sessió o proporcionar les dades de registre.")
+                
+                user = UserAccount.get_by_username(username, db_path)
+                
+                if user is None:
+                    # Crear nou usuari
+                    # NOTA: En producció, s'hauria d'utilitzar bcrypt o argon2
+                    password_hash = hashlib.sha256(password.encode()).hexdigest()
+                    user_id = UserAccount.create(username, password_hash, email, db_path)
+                else:
+                    user_id = user.id
             
             # Crea la comanda
             order_id = Order.create(total, user_id, db_path)

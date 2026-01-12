@@ -840,6 +840,54 @@ body {
     gap: 1.5rem;
 }
 
+.user-info-box {
+    background: linear-gradient(135deg, rgba(16, 185, 129, 0.1) 0%, rgba(5, 150, 105, 0.1) 100%);
+    border: 2px solid rgba(16, 185, 129, 0.3);
+    border-radius: 0.75rem;
+    padding: 1.5rem;
+    margin-bottom: 1.5rem;
+}
+
+.user-info-box h4 {
+    color: var(--success-dark);
+    font-size: 1.25rem;
+    font-weight: 700;
+    margin-bottom: 0.75rem;
+}
+
+.user-info-box p {
+    color: var(--text-primary);
+    margin: 0.5rem 0;
+    line-height: 1.6;
+}
+
+.user-info-box strong {
+    color: var(--text-primary);
+    font-weight: 600;
+}
+
+.info-note {
+    background: linear-gradient(135deg, rgba(99, 102, 241, 0.1) 0%, rgba(129, 140, 248, 0.1) 100%);
+    border-left: 4px solid var(--primary-color);
+    border-radius: 0.5rem;
+    padding: 1rem 1.25rem;
+    margin-bottom: 1.5rem;
+    color: var(--text-secondary);
+    line-height: 1.6;
+}
+
+.info-note a {
+    color: var(--primary-color);
+    font-weight: 600;
+    text-decoration: none;
+    transition: color 0.3s ease;
+}
+
+.info-note a:hover {
+    color: var(--primary-dark);
+    text-decoration: underline;
+}
+
 .form-group {
     display: flex;
     flex-direction: column;
@@ -1050,6 +1098,234 @@ textarea.form-control {
     width: 100%;
 }
 
+/* Factura - Invoice */
+.invoice-container {
+    max-width: 900px;
+    margin: 2rem auto;
+    padding: 0 20px;
+}
+
+.invoice-header {
+    margin-bottom: 2rem;
+    display: flex;
+    justify-content: flex-end;
+    gap: 1rem;
+}
+
+.invoice-actions {
+    display: flex;
+    gap: 1rem;
+}
+
+.invoice-document {
+    background: var(--card-background);
+    padding: 3rem;
+    border-radius: 1rem;
+    box-shadow: var(--shadow-xl);
+    border: 1px solid var(--border-light);
+}
+
+.invoice-top {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    margin-bottom: 3rem;
+    padding-bottom: 2rem;
+    border-bottom: 3px solid var(--primary-color);
+}
+
+.invoice-company {
+    flex: 1;
+}
+
+.company-name {
+    font-size: 2.5rem;
+    font-weight: 800;
+    background: linear-gradient(135deg, var(--primary-color) 0%, var(--primary-light) 100%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+    margin-bottom: 0.5rem;
+}
+
+.company-info {
+    color: var(--text-secondary);
+    line-height: 1.8;
+    font-size: 0.95rem;
+}
+
+.invoice-title {
+    text-align: right;
+}
+
+.invoice-title h2 {
+    font-size: 2.5rem;
+    font-weight: 800;
+    color: var(--text-primary);
+    margin-bottom: 0.5rem;
+    text-transform: uppercase;
+    letter-spacing: 2px;
+}
+
+.invoice-number {
+    font-size: 1.25rem;
+    font-weight: 700;
+    color: var(--primary-color);
+    margin: 0.5rem 0;
+}
+
+.invoice-date {
+    color: var(--text-secondary);
+    font-size: 1rem;
+    margin: 0;
+}
+
+.invoice-client {
+    margin-bottom: 2.5rem;
+    padding: 1.5rem;
+    background: linear-gradient(135deg, rgba(99, 102, 241, 0.05) 0%, rgba(129, 140, 248, 0.05) 100%);
+    border-radius: 0.75rem;
+    border-left: 4px solid var(--primary-color);
+}
+
+.invoice-client h3 {
+    font-size: 1.25rem;
+    font-weight: 700;
+    color: var(--text-primary);
+    margin-bottom: 1rem;
+}
+
+.client-info {
+    color: var(--text-secondary);
+    line-height: 2;
+}
+
+.client-info p {
+    margin: 0.5rem 0;
+}
+
+.client-info strong {
+    color: var(--text-primary);
+    font-weight: 600;
+}
+
+.invoice-items {
+    margin-bottom: 2.5rem;
+}
+
+.invoice-items h3 {
+    font-size: 1.25rem;
+    font-weight: 700;
+    color: var(--text-primary);
+    margin-bottom: 1.5rem;
+}
+
+.invoice-table {
+    width: 100%;
+    border-collapse: collapse;
+    background: white;
+    border-radius: 0.75rem;
+    overflow: hidden;
+    box-shadow: var(--shadow-md);
+}
+
+.invoice-table thead {
+    background: linear-gradient(135deg, var(--primary-color) 0%, var(--primary-dark) 100%);
+    color: white;
+}
+
+.invoice-table th {
+    padding: 1.25rem 1rem;
+    text-align: left;
+    font-weight: 700;
+    font-size: 0.9rem;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+.invoice-table th.text-center {
+    text-align: center;
+}
+
+.invoice-table th.text-right {
+    text-align: right;
+}
+
+.invoice-table tbody tr {
+    border-bottom: 1px solid var(--border-light);
+    transition: background 0.3s ease;
+}
+
+.invoice-table tbody tr:hover {
+    background: rgba(99, 102, 241, 0.05);
+}
+
+.invoice-table tbody tr:last-child {
+    border-bottom: none;
+}
+
+.invoice-table td {
+    padding: 1.25rem 1rem;
+    color: var(--text-primary);
+}
+
+.invoice-table td.text-center {
+    text-align: center;
+}
+
+.invoice-table td.text-right {
+    text-align: right;
+    font-weight: 600;
+}
+
+.invoice-total {
+    background: linear-gradient(135deg, rgba(99, 102, 241, 0.1) 0%, rgba(129, 140, 248, 0.1) 100%);
+    font-size: 1.25rem;
+}
+
+.invoice-total td {
+    padding: 1.5rem 1rem;
+    font-weight: 700;
+}
+
+.total-amount {
+    font-size: 1.5rem;
+    background: linear-gradient(135deg, var(--primary-color) 0%, var(--primary-light) 100%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+}
+
+.invoice-footer {
+    margin-top: 3rem;
+    padding-top: 2rem;
+    border-top: 2px solid var(--border-light);
+}
+
+.invoice-notes {
+    margin-bottom: 1.5rem;
+}
+
+.invoice-notes h4 {
+    font-size: 1.1rem;
+    font-weight: 700;
+    color: var(--text-primary);
+    margin-bottom: 0.75rem;
+}
+
+.invoice-notes p {
+    color: var(--text-secondary);
+    line-height: 1.8;
+    margin: 0.5rem 0;
+}
+
+.invoice-legal {
+    text-align: center;
+    padding-top: 1.5rem;
+    border-top: 1px solid var(--border-light);
+    color: var(--text-light);
+}
+
 /* Responsive */
 @media (max-width: 768px) {
     .cart-container,
@@ -1085,6 +1361,45 @@ textarea.form-control {
 
     .user-greeting {
         display: none;
+    }
+
+    .invoice-container {
+        padding: 0 1rem;
+    }
+
+    .invoice-document {
+        padding: 2rem 1.5rem;
+    }
+
+    .invoice-top {
+        flex-direction: column;
+        gap: 2rem;
+    }
+
+    .invoice-title {
+        text-align: left;
+    }
+
+    .invoice-header {
+        flex-direction: column;
+        align-items: stretch;
+    }
+
+    .invoice-actions {
+        flex-direction: column;
+    }
+
+    .invoice-actions .btn {
+        width: 100%;
+    }
+
+    .invoice-table {
+        font-size: 0.875rem;
+    }
+
+    .invoice-table th,
+    .invoice-table td {
+        padding: 0.75rem 0.5rem;
     }
 }
 

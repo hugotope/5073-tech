@@ -1,0 +1,108 @@
+{% extends "base.html" %}
+
+{% block title %}Factura #{{ invoice_data.order_id }} - TechShop{% endblock %}
+
+{% block content %}
+<div class="invoice-container">
+    <div class="invoice-header">
+        <div class="invoice-actions">
+            <button onclick="window.print()" class="btn btn-primary">Imprimir Factura</button>
+            <a href="{{ url_for('index') }}" class="btn btn-secondary">Tornar a Productes</a>
+        </div>
+    </div>
+    
+    <div class="invoice-document">
+        <!-- Capçalera de la factura -->
+        <div class="invoice-top">
+            <div class="invoice-company">
+                <h1 class="company-name">🛒 TechShop</h1>
+                <p class="company-info">
+                    Botiga d'Electrònica Online<br>
+                    Barcelona, Espanya<br>
+                    NIF: B-12345678
+                </p>
+            </div>
+            <div class="invoice-title">
+                <h2>FACTURA</h2>
+                <p class="invoice-number">Núm. {{ invoice_number }}</p>
+                <p class="invoice-date">Data: {{ invoice_data.order.created_at.split()[0] if ' ' in invoice_data.order.created_at else invoice_data.order.created_at[:10] }}</p>
+            </div>
+        </div>
+        
+        <!-- Informació del client -->
+        <div class="invoice-client">
+            <h3>Dades del Client</h3>
+            <div class="client-info">
+                {% if invoice_data.user %}
+                <p><strong>Nom d'usuari:</strong> {{ invoice_data.user.username }}</p>
+                <p><strong>Correu electrònic:</strong> {{ invoice_data.user.email }}</p>
+                {% else %}
+                <p><strong>Client:</strong> Usuari no identificat</p>
+                {% endif %}
+                <p><strong>ID de Comanda:</strong> #{{ invoice_data.order_id }}</p>
+            </div>
+        </div>
+        
+        <!-- Detalls de la comanda -->
+        <div class="invoice-items">
+            <h3>Detall de Productes</h3>
+            <table class="invoice-table">
+                <thead>
+                    <tr>
+                        <th>Producte</th>
+                        <th class="text-center">Quantitat</th>
+                        <th class="text-right">Preu Unitari</th>
+                        <th class="text-right">Subtotal</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for item in invoice_data.invoice_items %}
+                    <tr>
+                        <td>{{ item.product.name }}</td>
+                        <td class="text-center">{{ item.quantity }}</td>
+                        <td class="text-right">{{ "%.2f"|format(item.unit_price) }} €</td>
+                        <td class="text-right">{{ "%.2f"|format(item.subtotal) }} €</td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+                <tfoot>
+                    <tr class="invoice-total">
+                        <td colspan="3" class="text-right"><strong>TOTAL:</strong></td>
+                        <td class="text-right total-amount"><strong>{{ "%.2f"|format(invoice_data.total) }} €</strong></td>
+                    </tr>
+                </tfoot>
+            </table>
+        </div>
+        
+        <!-- Informació addicional -->
+        <div class="invoice-footer">
+            <div class="invoice-notes">
+                <h4>Notes</h4>
+                <p>Gràcies per la teva compra! Aquesta factura serveix com a comprovant de la teva comanda.</p>
+                <p>Per a qualsevol consulta, contacta amb nosaltres a través del teu compte.</p>
+            </div>
+            <div class="invoice-legal">
+                <p><small>TechShop - Tots els drets reservats © {{ current_year }}</small></p>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_css %}
+<style>
+    @media print {
+        .invoice-actions, .navbar, .footer {
+            display: none !important;
+        }
+        .invoice-container {
+            padding: 0;
+        }
+        .invoice-document {
+            box-shadow: none;
+            border: none;
+        }
+    }
+</style>
+{% endblock %}
+

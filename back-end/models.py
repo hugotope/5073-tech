@@ -188,6 +188,26 @@ class Order:
             )
             conn.commit()
             return cur.lastrowid
+    
+    @staticmethod
+    def get_by_id(order_id: int, db_path: Path) -> Optional['Order']:
+        """Obté una comanda per ID.
+        
+        Args:
+            order_id: identificador de la comanda
+            db_path: ruta al fitxer de base de dades
+            
+        Returns:
+            Comanda o None si no existeix
+        """
+        with sqlite3.connect(db_path) as conn:
+            conn.row_factory = sqlite3.Row
+            cur = conn.cursor()
+            cur.execute("SELECT * FROM \"Order\" WHERE id = ?", (order_id,))
+            row = cur.fetchone()
+            if row:
+                return Order(**dict(row))
+            return None
 
 
 @dataclass
@@ -219,4 +239,22 @@ class OrderItem:
             )
             conn.commit()
             return cur.lastrowid
+    
+    @staticmethod
+    def get_by_order_id(order_id: int, db_path: Path) -> List['OrderItem']:
+        """Obté tots els elements d'una comanda.
+        
+        Args:
+            order_id: ID de la comanda
+            db_path: ruta al fitxer de base de dades
+            
+        Returns:
+            Llista d'elements de la comanda
+        """
+        with sqlite3.connect(db_path) as conn:
+            conn.row_factory = sqlite3.Row
+            cur = conn.cursor()
+            cur.execute("SELECT * FROM OrderItem WHERE order_id = ?", (order_id,))
+            rows = cur.fetchall()
+            return [OrderItem(**dict(row)) for row in rows]
 

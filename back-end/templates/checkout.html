@@ -42,8 +42,22 @@
     <!-- Formulari de checkout -->
     <div class="checkout-form-container">
         <h3>Dades de Contacte</h3>
+        
+        {% if is_authenticated and user %}
+        <!-- Usuari autenticat: mostrar informació i només adreça -->
+        <div class="user-info-box">
+            <h4>Comprant com: {{ user.username }}</h4>
+            <p><strong>Correu electrònic:</strong> {{ user.email }}</p>
+            <p class="info-note">Les teves dades estan guardades. Només cal que introdueixis l'adreça d'enviament.</p>
+        </div>
+        {% else %}
+        <!-- Usuari no autenticat: mostrar tots els camps -->
+        <p class="info-note">No tens compte? <a href="{{ url_for('register') }}">Registra't aquí</a> o <a href="{{ url_for('login') }}">inicia sessió</a> per agilitzar les teves compres.</p>
+        {% endif %}
+        
         <form method="POST" action="{{ url_for('checkout') }}" id="checkoutForm" class="checkout-form">
-            <!-- Nom d'usuari -->
+            {% if not is_authenticated %}
+            <!-- Nom d'usuari (només si no està autenticat) -->
             <div class="form-group">
                 <label for="username">Nom d'usuari *</label>
                 <input 
@@ -59,7 +73,7 @@
                 <small class="form-help">Entre 4 i 20 caràcters</small>
             </div>
 
-            <!-- Contrasenya -->
+            <!-- Contrasenya (només si no està autenticat) -->
             <div class="form-group">
                 <label for="password">Contrasenya *</label>
                 <input 
@@ -73,7 +87,7 @@
                 <small class="form-help">Mínim 8 caràcters</small>
             </div>
 
-            <!-- Email -->
+            <!-- Email (només si no està autenticat) -->
             <div class="form-group">
                 <label for="email">Correu Electrònic *</label>
                 <input 
@@ -85,8 +99,9 @@
                     title="Introdueix un correu electrònic vàlid"
                     class="form-control">
             </div>
+            {% endif %}
 
-            <!-- Adreça d'enviament -->
+            <!-- Adreça d'enviament (sempre necessària) -->
             <div class="form-group">
                 <label for="shipping_address">Adreça d'Enviament *</label>
                 <textarea 
@@ -96,7 +111,8 @@
                     required
                     minlength="10"
                     title="Introdueix una adreça completa"
-                    class="form-control"></textarea>
+                    class="form-control"
+                    placeholder="Introdueix la teva adreça completa d'enviament"></textarea>
                 <small class="form-help">Mínim 10 caràcters</small>
             </div>
 
@@ -113,30 +129,34 @@
 <script>
     // Validació addicional del client
     document.getElementById('checkoutForm').addEventListener('submit', function(e) {
-        const username = document.getElementById('username').value;
-        const password = document.getElementById('password').value;
-        const email = document.getElementById('email').value;
+        const isAuthenticated = {{ 'true' if is_authenticated else 'false' }};
         const address = document.getElementById('shipping_address').value;
-
         let errors = [];
 
-        // Validar username
-        if (username.length < 4 || username.length > 20) {
-            errors.push('El nom d\'usuari ha de tenir entre 4 i 20 caràcters');
+        // Si no està autenticat, validar camps d'usuari
+        if (!isAuthenticated) {
+            const username = document.getElementById('username').value;
+            const password = document.getElementById('password').value;
+            const email = document.getElementById('email').value;
+
+            // Validar username
+            if (username.length < 4 || username.length > 20) {
+                errors.push('El nom d\'usuari ha de tenir entre 4 i 20 caràcters');
+            }
+
+            // Validar password
+            if (password.length < 8) {
+                errors.push('La contrasenya ha de tenir com a mínim 8 caràcters');
+            }
+
+            // Validar email
+            const emailRegex = /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/;
+            if (!emailRegex.test(email)) {
+                errors.push('Correu electrònic no vàlid');
+            }
         }
 
-        // Validar password
-        if (password.length < 8) {
-            errors.push('La contrasenya ha de tenir com a mínim 8 caràcters');
-        }
-
-        // Validar email
-        const emailRegex = /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/;
-        if (!emailRegex.test(email)) {
-            errors.push('Correu electrònic no vàlid');
-        }
-
-        // Validar adreça
+        // Validar adreça (sempre necessària)
         if (address.length < 10) {
             errors.push('L\'adreça ha de tenir com a mínim 10 caràcters');
         }

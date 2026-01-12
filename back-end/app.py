@@ -14,6 +14,7 @@ Regles implementades:
 - Validar sempre les dades rebudes des del client abans de processar-les
 """
 from flask import Flask, render_template, request, redirect, url_for, session, flash
+from datetime import datetime
 import sqlite3
 from pathlib import Path
 
@@ -23,6 +24,7 @@ from controllers import cart_controller
 from controllers import order_controller
 from controllers import recommendation_controller
 from controllers import auth_controller
+from controllers import invoice_controller
 
 app = Flask(__name__)
 app.secret_key = 'techshop_secret_key_change_in_production'  # IMPORTANT: canviar en producció
@@ -237,6 +239,36 @@ def logout():
     return redirect(url_for('index'))
 
 
+@app.route('/invoice/<int:order_id>')
+def invoice(order_id):
+    """Mostra la factura d'una comanda.
+    
+    Args:
+        order_id: ID de la comanda
+    """
+    # Obtenir les dades de la factura
+    invoice_data = invoice_controller.get_invoice_data(order_id, DB_PATH)
+    
+    if invoice_data is None:
+        flash('La comanda no existeix', 'error')
+        return redirect(url_for('index'))
+    
+    # Verificar que l'usuari autenticat és el propietari de la comanda (opcional)
+    if session.get('user_id') and invoice_data['user']:
+        if session.get('user_id') != invoice_data['user'].id:
+            flash('No tens permís per veure aquesta factura', 'error')
+            return redirect(url_for('index'))
+    
+    # Generar número de factura
+    invoice_number = invoice_controller.format_invoice_number(order_id)
+    current_year = datetime.now().year
+    
+    return render_template('invoice.html', 
+                         invoice_data=invoice_data,
+                         invoice_number=invoice_number,
+                         current_year=current_year)
+
+
 @app.route('/checkout', methods=['GET', 'POST'])
 def checkout():
     """Pàgina de finalització de compra.
@@ -265,23 +297,47 @@ def checkout():
                 })
                 total += product.price * quantity
         
-        return render_template('checkout.html', cart_items=cart_details, total=total)
+        # Obtenir informació de l'usuari si està autenticat
+        user = None
+        user_id = session.get('user_id')
+        if user_id:
+            user = UserAccount.get_by_username(session.get('username', ''), DB_PATH)
+        
+        return render_template('checkout.html', 
+                             cart_items=cart_details, 
+                             total=total,
+                             user=user,
+                             is_authenticated=bool(user_id))
     
     else:  # POST
         # Obtenim les dades del formulari
-        username = request.form.get('username', '').strip()
-        password = request.form.get('password', '')
-        email = request.form.get('email', '').strip()
         shipping_address = request.form.get('shipping_address', '').strip()
         
-        # Validacions del servidor
-        errors = []
-        if len(username) < 4 or len(username) > 20:
-            errors.append('El nom d\'usuari ha de tenir entre 4 i 20 caràcters')
-        if len(password) < 8:
-            errors.append('La contrasenya ha de tenir com a mínim 8 caràcters')
-        if not email or '@' not in email:
-            errors.append('Correu electrònic no vàlid')
+        # Verificar si l'usuari està autenticat
+        user_id = session.get('user_id')
+        is_authenticated = bool(user_id)
+        
+        # Si no està autenticat, obtenir dades del formulari
+        if not is_authenticated:
+            username = request.form.get('username', '').strip()
+            password = request.form.get('password', '')
+            email = request.form.get('email', '').strip()
+            
+            # Validacions del servidor per a usuaris no autenticats
+            errors = []
+            if len(username) < 4 or len(username) > 20:
+                errors.append('El nom d\'usuari ha de tenir entre 4 i 20 caràcters')
+            if len(password) < 8:
+                errors.append('La contrasenya ha de tenir com a mínim 8 caràcters')
+            if not email or '@' not in email:
+                errors.append('Correu electrònic no vàlid')
+        else:
+            username = session.get('username', '')
+            password = None
+            email = None
+        
+        # Validació de l'adreça d'enviament (sempre necessària)
+        errors = errors if not is_authenticated else []
         if not shipping_address:
             errors.append('Has d\'introduir una adreça d\'enviament')
         
@@ -298,27 +354,37 @@ def checkout():
             return redirect(url_for('index'))
         
         try:
-            # Crear usuari i comanda
-            order_id = order_controller.create_order(
-                cart_items,
-                username=username,
-                password=password,
-                email=email,
-                db_path=DB_PATH
-            )
-            
-            # Guardar user_id a la sessió per a recomanacions
-            user = UserAccount.get_by_username(username, DB_PATH)
-            if user:
-                session['user_id'] = user.id
-                session['username'] = username
+            # Crear comanda
+            if is_authenticated:
+                # Usuari autenticat: usar el seu user_id
+                order_id = order_controller.create_order(
+                    cart_items,
+                    db_path=DB_PATH,
+                    user_id=user_id
+                )
+            else:
+                # Usuari no autenticat: crear o obtenir usuari
+                order_id = order_controller.create_order(
+                    cart_items,
+                    db_path=DB_PATH,
+                    username=username,
+                    password=password,
+                    email=email
+                )
+                
+                # Guardar user_id a la sessió per a recomanacions
+                user = UserAccount.get_by_username(username, DB_PATH)
+                if user:
+                    session['user_id'] = user.id
+                    session['username'] = username
             
             # Netegem el carretó
             session['cart'] = {}
             session.pop('cart', None)
             
             flash(f'Comanda realitzada amb èxit! ID de comanda: {order_id}', 'success')
-            return redirect(url_for('index'))
+            # Redirigir a la factura
+            return redirect(url_for('invoice', order_id=order_id))
             
         except Exception as e:
             flash(f'Error al processar la comanda: {str(e)}', 'error')
