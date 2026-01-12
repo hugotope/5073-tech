@@ -25,6 +25,7 @@ from controllers import order_controller
 from controllers import recommendation_controller
 from controllers import auth_controller
 from controllers import invoice_controller
+from controllers import order_history_controller
 
 app = Flask(__name__)
 app.secret_key = 'techshop_secret_key_change_in_production'  # IMPORTANT: canviar en producció
@@ -237,6 +238,28 @@ def logout():
     session.clear()
     flash(f'Has tancat sessió correctament. Fins aviat, {username}!', 'info')
     return redirect(url_for('index'))
+
+
+@app.route('/order-history')
+def order_history():
+    """Mostra el historial de comandes de l'usuari autenticat."""
+    user_id = session.get('user_id')
+    
+    if not user_id:
+        flash('Has d\'iniciar sessió per veure el teu historial de comandes', 'info')
+        return redirect(url_for('login'))
+    
+    # Obtenir el historial de comandes
+    orders = order_history_controller.get_user_orders(user_id, DB_PATH)
+    order_count = order_history_controller.get_order_count(user_id, DB_PATH)
+    
+    # Obtenir informació de l'usuari
+    user = UserAccount.get_by_username(session.get('username', ''), DB_PATH)
+    
+    return render_template('order_history.html', 
+                         orders=orders,
+                         order_count=order_count,
+                         user=user)
 
 
 @app.route('/invoice/<int:order_id>')

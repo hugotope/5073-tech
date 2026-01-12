@@ -15,8 +15,20 @@
                 <a href="{{ url_for('index') }}">Productes</a>
                 <a href="{{ url_for('cart') }}">Carretó</a>
                 {% if session.get('user_id') %}
-                    <span class="user-greeting">Hola, {{ session.get('username', 'Usuari') }}!</span>
-                    <a href="{{ url_for('logout') }}" class="btn-logout">Tancar Sessió</a>
+                    <div class="user-menu">
+                        <button class="user-menu-toggle" onclick="toggleUserMenu()">
+                            <span class="user-name">👤 {{ session.get('username', 'Usuari') }}</span>
+                            <span class="dropdown-arrow">▼</span>
+                        </button>
+                        <div class="user-menu-dropdown" id="userMenuDropdown">
+                            <a href="{{ url_for('order_history') }}" class="user-menu-item">
+                                📋 Historial de Comandes
+                            </a>
+                            <a href="{{ url_for('logout') }}" class="user-menu-item logout-item">
+                                🚪 Tancar Sessió
+                            </a>
+                        </div>
+                    </div>
                 {% else %}
                     <a href="{{ url_for('login') }}">Iniciar Sessió</a>
                     <a href="{{ url_for('register') }}" class="btn-register">Registrar-se</a>
@@ -48,6 +60,24 @@
     </footer>
 
     <script src="{{ url_for('static', filename='js/main.js') }}"></script>
+    <script>
+        // Tancar el menú d'usuari quan es fa clic fora
+        document.addEventListener('click', function(event) {
+            const userMenu = document.getElementById('userMenuDropdown');
+            const userMenuToggle = document.querySelector('.user-menu-toggle');
+            
+            if (userMenu && userMenuToggle && !userMenu.contains(event.target) && !userMenuToggle.contains(event.target)) {
+                userMenu.classList.remove('active');
+            }
+        });
+        
+        function toggleUserMenu() {
+            const dropdown = document.getElementById('userMenuDropdown');
+            if (dropdown) {
+                dropdown.classList.toggle('active');
+            }
+        }
+    </script>
     {% block extra_js %}{% endblock %}
 </body>
 </html>

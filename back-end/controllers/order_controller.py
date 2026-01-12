@@ -78,10 +78,20 @@ def create_order(cart: Dict[str, int], db_path: Path,
                 product = Product.get_by_id(int(product_id), db_path)
                 if product is None:
                     raise ValueError(f"Producte amb ID {product_id} no trobat")
+                if product.stock <= 0:
+                    raise ValueError(
+                        f"El producte {product.name} està sense stock"
+                    )
                 if product.stock < quantity:
                     raise ValueError(
                         f"Stock insuficient per a {product.name}: "
                         f"se sol·liciten {quantity} però només hi ha {product.stock}"
+                    )
+                # Verificar que després de la compra el stock no serà negatiu
+                if product.stock - quantity < 0:
+                    raise ValueError(
+                        f"No es pot comprar {quantity} unitats de {product.name}. "
+                        f"Stock disponible: {product.stock}"
                     )
                 total += product.price * quantity
             
@@ -116,9 +126,14 @@ def create_order(cart: Dict[str, int], db_path: Path,
                 # Crea OrderItem
                 OrderItem.create(order_id, int(product_id), quantity, db_path)
                 
-                # Actualitza el stock
+                # Actualitza el stock (amb validació final)
                 product = Product.get_by_id(int(product_id), db_path)
                 new_stock = product.stock - quantity
+                if new_stock < 0:
+                    raise ValueError(
+                        f"Error: el stock de {product.name} no pot ser negatiu. "
+                        f"Stock actual: {product.stock}, Quantitat sol·licitada: {quantity}"
+                    )
                 product.update_stock(new_stock, db_path)
             
             conn.commit()

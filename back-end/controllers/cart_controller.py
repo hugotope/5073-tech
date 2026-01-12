@@ -87,8 +87,15 @@ def validate_stock(product_id: str, quantity: int, db_path: Path) -> Tuple[bool,
         if product is None:
             return False, "El producte no existeix"
         
+        if product.stock <= 0:
+            return False, f"El producte {product.name} està sense stock"
+        
         if product.stock < quantity:
             return False, f"Stock insuficient. Només hi ha {product.stock} unitat(s) disponible(s)"
+        
+        # Verificar que després de la compra el stock no serà negatiu
+        if product.stock - quantity < 0:
+            return False, f"No es pot comprar {quantity} unitats. Stock disponible: {product.stock}"
         
         return True, None
         
