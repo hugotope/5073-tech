@@ -22,6 +22,7 @@ from models import Product, Order, OrderItem, UserAccount
 from controllers import cart_controller
 from controllers import order_controller
 from controllers import recommendation_controller
+from controllers import auth_controller
 
 app = Flask(__name__)
 app.secret_key = 'techshop_secret_key_change_in_production'  # IMPORTANT: canviar en producció
@@ -144,6 +145,96 @@ def remove_from_cart():
     except Exception as e:
         flash(f'Error inesperat: {str(e)}', 'error')
         return redirect(url_for('cart'))
+
+
+@app.route('/login', methods=['GET', 'POST'])
+def login():
+    """Pàgina d'inici de sessió.
+    
+    GET: mostra el formulari de login
+    POST: processa l'inici de sessió
+    """
+    # Si l'usuari ja està autenticat, redirigir a l'índex
+    if session.get('user_id'):
+        flash('Ja estàs autenticat', 'info')
+        return redirect(url_for('index'))
+    
+    if request.method == 'GET':
+        return render_template('login.html')
+    
+    else:  # POST
+        username = request.form.get('username', '').strip()
+        password = request.form.get('password', '')
+        
+        if not username or not password:
+            flash('Has d\'introduir nom d\'usuari i contrasenya', 'error')
+            return redirect(url_for('login'))
+        
+        success, message, user = auth_controller.login_user(username, password, DB_PATH)
+        
+        if success and user:
+            # Guardar dades de l'usuari a la sessió
+            session['user_id'] = user.id
+            session['username'] = user.username
+            flash(message, 'success')
+            
+            # Redirigir a la pàgina que volia visitar o a l'índex
+            next_page = request.args.get('next', url_for('index'))
+            return redirect(next_page)
+        else:
+            flash(message, 'error')
+            return redirect(url_for('login'))
+
+
+@app.route('/register', methods=['GET', 'POST'])
+def register():
+    """Pàgina de registre d'usuaris.
+    
+    GET: mostra el formulari de registre
+    POST: processa el registre
+    """
+    # Si l'usuari ja està autenticat, redirigir a l'índex
+    if session.get('user_id'):
+        flash('Ja estàs autenticat', 'info')
+        return redirect(url_for('index'))
+    
+    if request.method == 'GET':
+        return render_template('register.html')
+    
+    else:  # POST
+        username = request.form.get('username', '').strip()
+        email = request.form.get('email', '').strip()
+        password = request.form.get('password', '')
+        confirm_password = request.form.get('confirm_password', '')
+        
+        # Validació de confirmació de contrasenya
+        if password != confirm_password:
+            flash('Les contrasenyes no coincideixen', 'error')
+            return redirect(url_for('register'))
+        
+        # Registrar l'usuari
+        success, message = auth_controller.register_user(username, password, email, DB_PATH)
+        
+        if success:
+            flash(message, 'success')
+            # Autenticar automàticament després del registre
+            success_login, _, user = auth_controller.login_user(username, password, DB_PATH)
+            if success_login and user:
+                session['user_id'] = user.id
+                session['username'] = user.username
+            return redirect(url_for('index'))
+        else:
+            flash(message, 'error')
+            return redirect(url_for('register'))
+
+
+@app.route('/logout')
+def logout():
+    """Tanca la sessió de l'usuari."""
+    username = session.get('username', 'Usuari')
+    session.clear()
+    flash(f'Has tancat sessió correctament. Fins aviat, {username}!', 'info')
+    return redirect(url_for('index'))
 
 
 @app.route('/checkout', methods=['GET', 'POST'])

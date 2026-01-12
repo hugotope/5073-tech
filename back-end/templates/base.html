@@ -14,6 +14,13 @@
             <div class="nav-links">
                 <a href="{{ url_for('index') }}">Productes</a>
                 <a href="{{ url_for('cart') }}">Carretó</a>
+                {% if session.get('user_id') %}
+                    <span class="user-greeting">Hola, {{ session.get('username', 'Usuari') }}!</span>
+                    <a href="{{ url_for('logout') }}" class="btn-logout">Tancar Sessió</a>
+                {% else %}
+                    <a href="{{ url_for('login') }}">Iniciar Sessió</a>
+                    <a href="{{ url_for('register') }}" class="btn-register">Registrar-se</a>
+                {% endif %}
             </div>
         </div>
     </nav>

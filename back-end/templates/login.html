@@ -1,0 +1,51 @@
+{% extends "base.html" %}
+
+{% block title %}Iniciar Sessió - TechShop{% endblock %}
+
+{% block content %}
+<div class="auth-container">
+    <div class="auth-card">
+        <div class="auth-header">
+            <h2>Iniciar Sessió</h2>
+            <p class="subtitle">Accedeix al teu compte de TechShop</p>
+        </div>
+        
+        <form method="POST" action="{{ url_for('login') }}" class="auth-form">
+            <div class="form-group">
+                <label for="username">Nom d'usuari</label>
+                <input 
+                    type="text" 
+                    id="username" 
+                    name="username" 
+                    class="form-control" 
+                    required 
+                    autofocus
+                    minlength="4"
+                    maxlength="20"
+                    placeholder="Introdueix el teu nom d'usuari">
+            </div>
+            
+            <div class="form-group">
+                <label for="password">Contrasenya</label>
+                <input 
+                    type="password" 
+                    id="password" 
+                    name="password" 
+                    class="form-control" 
+                    required
+                    minlength="8"
+                    placeholder="Introdueix la teva contrasenya">
+            </div>
+            
+            <div class="form-actions">
+                <button type="submit" class="btn btn-primary btn-large">Iniciar Sessió</button>
+            </div>
+        </form>
+        
+        <div class="auth-footer">
+            <p>No tens compte? <a href="{{ url_for('register') }}" class="auth-link">Registra't aquí</a></p>
+        </div>
+    </div>
+</div>
+{% endblock %}
+

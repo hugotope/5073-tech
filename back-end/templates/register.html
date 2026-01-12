@@ -1,0 +1,114 @@
+{% extends "base.html" %}
+
+{% block title %}Registre - TechShop{% endblock %}
+
+{% block content %}
+<div class="auth-container">
+    <div class="auth-card">
+        <div class="auth-header">
+            <h2>Crear Compte</h2>
+            <p class="subtitle">Uneix-te a TechShop i gaudeix de les millors ofertes</p>
+        </div>
+        
+        <form method="POST" action="{{ url_for('register') }}" class="auth-form">
+            <div class="form-group">
+                <label for="username">Nom d'usuari</label>
+                <input 
+                    type="text" 
+                    id="username" 
+                    name="username" 
+                    class="form-control" 
+                    required 
+                    autofocus
+                    minlength="4"
+                    maxlength="20"
+                    placeholder="Entre 4 i 20 caràcters">
+                <span class="form-help">El nom d'usuari ha de tenir entre 4 i 20 caràcters</span>
+            </div>
+            
+            <div class="form-group">
+                <label for="email">Correu Electrònic</label>
+                <input 
+                    type="email" 
+                    id="email" 
+                    name="email" 
+                    class="form-control" 
+                    required
+                    placeholder="exemple@correu.com">
+            </div>
+            
+            <div class="form-group">
+                <label for="password">Contrasenya</label>
+                <input 
+                    type="password" 
+                    id="password" 
+                    name="password" 
+                    class="form-control" 
+                    required
+                    minlength="8"
+                    placeholder="Mínim 8 caràcters">
+                <span class="form-help">La contrasenya ha de tenir com a mínim 8 caràcters</span>
+            </div>
+            
+            <div class="form-group">
+                <label for="confirm_password">Confirmar Contrasenya</label>
+                <input 
+                    type="password" 
+                    id="confirm_password" 
+                    name="confirm_password" 
+                    class="form-control" 
+                    required
+                    minlength="8"
+                    placeholder="Repeteix la contrasenya">
+            </div>
+            
+            <div class="form-actions">
+                <button type="submit" class="btn btn-primary btn-large">Crear Compte</button>
+            </div>
+        </form>
+        
+        <div class="auth-footer">
+            <p>Ja tens compte? <a href="{{ url_for('login') }}" class="auth-link">Inicia sessió aquí</a></p>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+    // Validació de confirmació de contrasenya
+    document.addEventListener('DOMContentLoaded', function() {
+        const form = document.querySelector('.auth-form');
+        const passwordInput = document.getElementById('password');
+        const confirmPasswordInput = document.getElementById('confirm_password');
+        
+        // Validació en temps real
+        confirmPasswordInput.addEventListener('input', function() {
+            if (this.value && passwordInput.value !== this.value) {
+                this.setCustomValidity('Les contrasenyes no coincideixen');
+            } else {
+                this.setCustomValidity('');
+            }
+        });
+        
+        passwordInput.addEventListener('input', function() {
+            if (confirmPasswordInput.value && this.value !== confirmPasswordInput.value) {
+                confirmPasswordInput.setCustomValidity('Les contrasenyes no coincideixen');
+            } else {
+                confirmPasswordInput.setCustomValidity('');
+            }
+        });
+        
+        // Validació al enviar el formulari
+        form.addEventListener('submit', function(e) {
+            if (passwordInput.value !== confirmPasswordInput.value) {
+                e.preventDefault();
+                confirmPasswordInput.setCustomValidity('Les contrasenyes no coincideixen');
+                confirmPasswordInput.reportValidity();
+                return false;
+            }
+        });
+    });
+</script>
+{% endblock %}
+
