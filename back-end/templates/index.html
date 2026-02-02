@@ -45,6 +45,20 @@
         </div>
         {% endfor %}
     </div>
+    {% if sheets_configured %}
+    <div class="sheets-sync-actions">
+        <a href="{{ url_for('sync_recommendations_sheets') }}" class="btn btn-secondary">
+            📊 Enviar recomanacions i stock a Google Sheets
+        </a>
+    </div>
+    {% endif %}
+</div>
+{% endif %}
+
+{% if sheets_configured and not recommended_products %}
+<div class="recommendations-section">
+    <p class="subtitle">Sincronitza els productes més populars i el stock amb Google Sheets.</p>
+    <a href="{{ url_for('sync_recommendations_sheets') }}" class="btn btn-secondary">📊 Enviar llistat a Google Sheets</a>
 </div>
 {% endif %}
 

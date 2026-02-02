@@ -430,6 +430,17 @@ body {
     box-shadow: var(--shadow-colored);
 }
 
+.sheets-sync-actions {
+    margin-top: 2rem;
+    text-align: center;
+}
+
+.sheets-sync-actions .btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+
 /* Productes millorats */
 .products-header {
     text-align: center;

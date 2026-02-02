@@ -33,3 +33,9 @@ Thumbs.db
 # Logs
 *.log
 
+# Google Sheets / secrets
+.env
+*-credentials.json
+*-service-account.json
+back-end/tech-486214-*.json
+

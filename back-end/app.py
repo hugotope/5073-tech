@@ -13,10 +13,17 @@ Regles implementades:
 - No superar les 5 unitats per producte al carretó
 - Validar sempre les dades rebudes des del client abans de processar-les
 """
+from pathlib import Path
+import os
+
+from dotenv import load_dotenv
+
+# Carregar .env des de la arrel del projecte o des de back-end
+_load_env = load_dotenv(Path(__file__).parent.parent / ".env") or load_dotenv(Path(__file__).parent / ".env")
+
 from flask import Flask, render_template, request, redirect, url_for, session, flash
 from datetime import datetime
 import sqlite3
-from pathlib import Path
 
 # Importem models
 from models import Product, Order, OrderItem, UserAccount
@@ -26,12 +33,22 @@ from controllers import recommendation_controller
 from controllers import auth_controller
 from controllers import invoice_controller
 from controllers import order_history_controller
+from services.sheets_sync_service import (
+    sync_recommended_products_to_sheets,
+    is_sheets_configured,
+)
 
 app = Flask(__name__)
 app.secret_key = 'techshop_secret_key_change_in_production'  # IMPORTANT: canviar en producció
 
 # Configuració de la base de dades
 DB_PATH = Path(__file__).parent / "database" / "db.sqlite3"
+
+
+@app.context_processor
+def inject_sheets_config():
+    """Inyecta en tots els templates si Google Sheets està configurat."""
+    return {"sheets_configured": is_sheets_configured()}
 
 
 @app.route('/')
@@ -49,6 +66,27 @@ def index():
     return render_template('index.html', 
                          products=products, 
                          recommended_products=recommended_products)
+
+
+@app.route('/sync-recommendations-sheets', methods=['GET', 'POST'])
+def sync_recommendations_sheets():
+    """
+    Sincronitza els productes recomanats i el seu stock amb Google Sheets.
+    Es mostren els recomanats per l'usuari actual (o els populars si no hi ha sessió).
+    """
+    user_id = session.get('user_id', None)
+    recommended_products = recommendation_controller.get_recommended_products(
+        user_id, DB_PATH, limit=50
+    )
+    rows = [(p.id, p.name, p.price, p.stock) for p in recommended_products]
+    success, message, url = sync_recommended_products_to_sheets(rows, DB_PATH, create_if_missing=True)
+    if success:
+        flash(message, 'success')
+        if url:
+            flash(f"Obre el document: {url}", 'info')
+    else:
+        flash(message, 'error')
+    return redirect(url_for('index'))
 
 
 @app.route('/cart')
