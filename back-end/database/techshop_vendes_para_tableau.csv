@@ -1,0 +1,25 @@
+order_id;order_date;order_total;shipping_city;shipping_province;shipping_country;user_id;username;user_segment;product_id;product_name;category_name;subcategory_name;quantity;unit_price;line_total
+1;2026-02-02 15:55:19;86.4;Barcelona;Barcelona;Espanya;1;alumn01;Professional;1;Raspberry Pi 4 Model B 2GB;Plaques;Raspberry Pi;1;45;45
+1;2026-02-02 15:55:19;86.4;Barcelona;Barcelona;Espanya;1;alumn01;Professional;2;Raspberry Pi 4 Model B 4GB;Plaques;Raspberry Pi;1;55;55
+1;2026-02-02 15:55:19;86.4;Barcelona;Barcelona;Espanya;1;alumn01;Professional;3;Raspberry Pi 4 Model B 8GB;Plaques;Raspberry Pi;1;75;75
+2;2026-02-02 15:55:19;44.39;L'Hospitalet;Barcelona;Espanya;2;maria_tech;Aficionat;2;Raspberry Pi 4 Model B 4GB;Plaques;Raspberry Pi;1;55;55
+2;2026-02-02 15:55:19;44.39;L'Hospitalet;Barcelona;Espanya;2;maria_tech;Aficionat;3;Raspberry Pi 4 Model B 8GB;Plaques;Raspberry Pi;2;75;150
+2;2026-02-02 15:55:19;44.39;L'Hospitalet;Barcelona;Espanya;2;maria_tech;Aficionat;4;Raspberry Pi Zero 2 W;Plaques;Raspberry Pi;1;15;15
+3;2026-02-02 15:55:19;73.98;Badalona;Barcelona;Espanya;3;joan_dev;Educació;1;Raspberry Pi 4 Model B 2GB;Plaques;Raspberry Pi;1;45;45
+3;2026-02-02 15:55:19;73.98;Badalona;Barcelona;Espanya;3;joan_dev;Educació;4;Raspberry Pi Zero 2 W;Plaques;Raspberry Pi;1;15;15
+3;2026-02-02 15:55:19;73.98;Badalona;Barcelona;Espanya;3;joan_dev;Educació;8;Arduino Mega 2560;Plaques;Arduino;1;42;42
+4;2026-02-02 15:55:19;33.98;Girona;Girona;Espanya;4;anna_iot;Professional;2;Raspberry Pi 4 Model B 4GB;Plaques;Raspberry Pi;1;55;55
+4;2026-02-02 15:55:19;33.98;Girona;Girona;Espanya;4;anna_iot;Professional;5;Raspberry Pi Pico;Plaques;Raspberry Pi;2;4.5;9.0
+4;2026-02-02 15:55:19;33.98;Girona;Girona;Espanya;4;anna_iot;Professional;6;Arduino Uno Rev3;Plaques;Arduino;10;22.5;225.0
+4;2026-02-02 15:55:19;33.98;Girona;Girona;Espanya;4;anna_iot;Professional;10;ESP32-CAM;Plaques;ESP / NodeMCU;1;9.99;9.99
+5;2026-02-02 15:55:19;36.98;Figueres;Girona;Espanya;5;carlos_arduino;Aficionat;2;Raspberry Pi 4 Model B 4GB;Plaques;Raspberry Pi;1;55;55
+5;2026-02-02 15:55:19;36.98;Figueres;Girona;Espanya;5;carlos_arduino;Aficionat;5;Raspberry Pi Pico;Plaques;Raspberry Pi;1;4.5;4.5
+5;2026-02-02 15:55:19;36.98;Figueres;Girona;Espanya;5;carlos_arduino;Aficionat;8;Arduino Mega 2560;Plaques;Arduino;1;42;42
+5;2026-02-02 15:55:19;36.98;Figueres;Girona;Espanya;5;carlos_arduino;Aficionat;9;ESP32 Development Board;Plaques;ESP / NodeMCU;1;12.99;12.99
+6;2026-02-02 15:55:19;73.99;Lleida;Lleida;Espanya;6;laura_rasp;Educació;1;Raspberry Pi 4 Model B 2GB;Plaques;Raspberry Pi;1;45;45
+6;2026-02-02 15:55:19;73.99;Lleida;Lleida;Espanya;6;laura_rasp;Educació;11;ESP8266 NodeMCU;Plaques;ESP / NodeMCU;1;7.5;7.5
+6;2026-02-02 15:55:19;73.99;Lleida;Lleida;Espanya;6;laura_rasp;Educació;12;STM32 Blue Pill;Plaques;Altres plaques;1;4.2;4.2
+7;2026-02-02 15:55:19;10.49;Tarragona;Tarragona;Espanya;2;maria_tech;Aficionat;8;Arduino Mega 2560;Plaques;Arduino;1;42;42
+7;2026-02-02 15:55:19;10.49;Tarragona;Tarragona;Espanya;2;maria_tech;Aficionat;9;ESP32 Development Board;Plaques;ESP / NodeMCU;1;12.99;12.99
+8;2026-02-02 15:55:19;13.4;Reus;Tarragona;Espanya;3;joan_dev;Educació;3;Raspberry Pi 4 Model B 8GB;Plaques;Raspberry Pi;1;75;75
+8;2026-02-02 15:55:19;13.4;Reus;Tarragona;Espanya;3;joan_dev;Educació;9;ESP32 Development Board;Plaques;ESP / NodeMCU;1;12.99;12.99

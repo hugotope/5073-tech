@@ -26,23 +26,26 @@ def init_db():
 
         cur = conn.cursor()
         import hashlib
-        
-        # Inserir productes d'exemple (més productes per a recomanacions)
-        products = [
-            ("Raspberry Pi 4 Model B", 55.00, 10),
-            ("Arduino Uno Rev3", 22.50, 25),
-            ("Sensor DHT22", 8.90, 50),
-            ("ESP32 Development Board", 12.99, 30),
-            ("Sensor Ultrasonic HC-SR04", 3.50, 40),
-            ("LED RGB 5mm", 0.50, 100),
-            ("Resistència Pack 220Ω", 2.99, 80),
-            ("Breadboard 830 punts", 5.99, 35),
-            ("Cable jumper pack", 4.50, 45),
-            ("Motor Servo SG90", 6.99, 20),
-            ("Display LCD 16x2", 8.50, 25),
-            ("Mòdul Bluetooth HC-05", 9.99, 15),
+
+        # Inserir categories
+        categories = [
+            ("Plaques", "plaques"),
+            ("Sensors", "sensors"),
+            ("LED", "led"),
+            ("Components", "components"),
+            ("Displays", "displays"),
+            ("Mòduls", "moduls"),
+            ("Motors i Servos", "motors-servos"),
+            ("Monitors", "monitors"),
         ]
-        cur.executemany("INSERT INTO Product(name, price, stock) VALUES(?,?,?)", products)
+        cur.executemany("INSERT INTO Category(name, slug) VALUES(?,?)", categories)
+
+        # Inserir 100 productes d'inventari categoritzats
+        from seed_100_products import PRODUCTES_100
+        cur.executemany(
+            "INSERT INTO Product(name, price, stock, category_id) VALUES(?,?,?,?)",
+            PRODUCTES_100,
+        )
 
         # Funció helper per generar hash de contrasenya
         def hash_password(password):
