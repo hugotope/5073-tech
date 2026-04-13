@@ -64,11 +64,106 @@ body {
     border-bottom: 1px solid var(--border-light);
 }
 
-.navbar .container {
+.navbar .container,
+.navbar-inner {
     display: flex;
     justify-content: space-between;
     align-items: center;
-    padding: 1.25rem 20px;
+    padding: 1rem 20px;
+    gap: 1rem;
+    flex-wrap: nowrap;
+    min-width: 0;
+}
+
+/* Caixa del filtre dins la navbar */
+.navbar-filter-box {
+    flex: 1;
+    min-width: 0;
+    max-width: 420px;
+    margin: 0 0.5rem;
+}
+
+.navbar-search {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    width: 100%;
+    min-width: 0;
+    padding: 0.35rem;
+    background: var(--background-color);
+    border: 1px solid var(--border-color);
+    border-radius: 0.5rem;
+    box-sizing: border-box;
+}
+
+.navbar-search-input {
+    flex: 1;
+    min-width: 0;
+    width: 80px;
+    padding: 0.5rem 0.75rem;
+    border: none;
+    border-radius: 0.35rem;
+    font-size: 0.9rem;
+    font-family: inherit;
+    color: var(--text-primary);
+    background: transparent;
+    transition: background 0.2s;
+}
+
+.navbar-search-input::placeholder {
+    color: var(--text-light);
+}
+
+.navbar-search-input:focus {
+    outline: none;
+    background: white;
+    box-shadow: var(--shadow-sm);
+}
+
+.navbar-category-select {
+    padding: 0.5rem 1.75rem 0.5rem 0.75rem;
+    border: none;
+    border-radius: 0.35rem;
+    font-size: 0.85rem;
+    font-family: inherit;
+    font-weight: 500;
+    color: var(--text-primary);
+    background: transparent;
+    cursor: pointer;
+    transition: background 0.2s;
+    min-width: 0;
+    max-width: 140px;
+    width: 100%;
+}
+
+.navbar-category-select:hover,
+.navbar-category-select:focus {
+    outline: none;
+    background: rgba(255, 255, 255, 0.8);
+}
+
+.navbar-search-btn {
+    padding: 0.5rem 1rem;
+    background: linear-gradient(135deg, var(--primary-color) 0%, var(--primary-dark) 100%);
+    color: white;
+    border: none;
+    border-radius: 0.35rem;
+    font-size: 0.85rem;
+    font-weight: 600;
+    font-family: inherit;
+    cursor: pointer;
+    transition: transform 0.2s, box-shadow 0.2s;
+    white-space: nowrap;
+    flex-shrink: 0;
+}
+
+.navbar-search-btn:hover {
+    transform: translateY(-1px);
+    box-shadow: var(--shadow-md);
+}
+
+.nav-links {
+    flex-shrink: 0;
 }
 
 .logo {
@@ -82,6 +177,8 @@ body {
     display: flex;
     align-items: center;
     gap: 0.5rem;
+    text-decoration: none;
+    flex-shrink: 0;
 }
 
 .logo::before {
@@ -343,7 +440,122 @@ body {
     font-weight: bold;
 }
 
-/* Secció de recomanacions */
+/* Hero section */
+.hero {
+    margin: 0 -20px 3rem;
+    padding: 3.5rem 2rem;
+    background: linear-gradient(135deg, rgba(99, 102, 241, 0.12) 0%, rgba(129, 140, 248, 0.08) 50%, rgba(118, 75, 162, 0.06) 100%);
+    border-radius: 1.25rem;
+    border: 1px solid rgba(99, 102, 241, 0.2);
+    text-align: center;
+    position: relative;
+    overflow: hidden;
+}
+
+.hero::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: radial-gradient(ellipse 80% 50% at 50% -20%, rgba(99, 102, 241, 0.15), transparent);
+    pointer-events: none;
+}
+
+.hero-content {
+    position: relative;
+    z-index: 1;
+}
+
+.hero-title {
+    font-size: clamp(1.75rem, 4vw, 2.5rem);
+    font-weight: 800;
+    background: linear-gradient(135deg, var(--primary-color) 0%, var(--primary-dark) 100%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+    margin-bottom: 0.75rem;
+    letter-spacing: -0.5px;
+}
+
+.hero-subtitle {
+    font-size: 1.1rem;
+    color: var(--text-secondary);
+    max-width: 560px;
+    margin: 0 auto;
+    line-height: 1.6;
+}
+
+/* Desplegable de recomanacions */
+.recommendations-dropdown {
+    margin: 3rem 0 2rem;
+    border-radius: 1rem;
+    border: 2px solid rgba(99, 102, 241, 0.25);
+    background: var(--card-background);
+    box-shadow: var(--shadow-md);
+    overflow: hidden;
+}
+
+.recommendations-dropdown-summary {
+    list-style: none;
+    display: flex;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 0.5rem 0.75rem;
+    padding: 1.25rem 1.5rem;
+    cursor: pointer;
+    background: linear-gradient(135deg, rgba(99, 102, 241, 0.08) 0%, rgba(129, 140, 248, 0.05) 100%);
+    font-weight: 600;
+    transition: background 0.2s;
+    user-select: none;
+}
+
+.recommendations-dropdown-summary::-webkit-details-marker {
+    display: none;
+}
+
+.recommendations-dropdown-summary:hover {
+    background: linear-gradient(135deg, rgba(99, 102, 241, 0.12) 0%, rgba(129, 140, 248, 0.08) 100%);
+}
+
+.recommendations-dropdown-title {
+    font-size: 1.25rem;
+    background: linear-gradient(135deg, var(--primary-color) 0%, var(--primary-dark) 100%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+}
+
+.recommendations-dropdown-subtitle {
+    font-size: 0.9rem;
+    font-weight: 500;
+    color: var(--text-secondary);
+    flex: 1;
+    min-width: 0;
+}
+
+.recommendations-dropdown-arrow {
+    margin-left: auto;
+    width: 0;
+    height: 0;
+    border-left: 6px solid transparent;
+    border-right: 6px solid transparent;
+    border-top: 8px solid var(--primary-color);
+    transition: transform 0.25s ease;
+}
+
+.recommendations-dropdown[open] .recommendations-dropdown-arrow {
+    transform: rotate(180deg);
+}
+
+.recommendations-dropdown-content {
+    padding: 1.5rem 1.5rem 2rem;
+    border-top: 1px solid var(--border-light);
+    background: linear-gradient(180deg, rgba(99, 102, 241, 0.03) 0%, transparent 100%);
+}
+
+/* Secció de recomanacions (standalone: sense productes però amb Sheets) */
 .recommendations-section {
     margin: 3rem 0 4rem;
     padding: 2.5rem;
@@ -353,6 +565,20 @@ body {
     box-shadow: var(--shadow-lg);
     position: relative;
     overflow: hidden;
+}
+
+/* Dins del desplegable, la secció no duplica estils */
+.recommendations-dropdown-content .recommendations-section {
+    margin: 0;
+    padding: 0;
+    background: transparent;
+    border: none;
+    border-radius: 0;
+    box-shadow: none;
+}
+
+.recommendations-dropdown-content .recommendations-section::before {
+    display: none;
 }
 
 .recommendations-section::before {
@@ -463,6 +689,63 @@ body {
     color: var(--text-secondary);
     font-size: 1.2rem;
     font-weight: 400;
+}
+
+.categories-filter {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.75rem;
+    justify-content: center;
+    margin-bottom: 2rem;
+}
+
+.category-pill {
+    display: inline-block;
+    padding: 0.5rem 1.25rem;
+    border-radius: 2rem;
+    font-weight: 600;
+    font-size: 0.9rem;
+    text-decoration: none;
+    color: var(--text-secondary);
+    background: var(--card-background);
+    border: 2px solid var(--border-color);
+    transition: all 0.3s ease;
+}
+
+.category-pill:hover {
+    color: var(--primary-color);
+    border-color: var(--primary-color);
+    background: rgba(99, 102, 241, 0.08);
+}
+
+.category-pill.active {
+    color: white;
+    background: linear-gradient(135deg, var(--primary-color) 0%, var(--primary-dark) 100%);
+    border-color: var(--primary-color);
+}
+
+.no-results {
+    text-align: center;
+    padding: 3rem 2rem;
+    font-size: 1.15rem;
+    color: var(--text-secondary);
+    background: var(--card-background);
+    border-radius: 1rem;
+    border: 2px dashed var(--border-color);
+    margin: 2rem 0;
+}
+
+.product-category {
+    display: inline-block;
+    font-size: 0.75rem;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    color: var(--primary-color);
+    background: rgba(99, 102, 241, 0.12);
+    padding: 0.25rem 0.6rem;
+    border-radius: 0.5rem;
+    margin-bottom: 0.5rem;
 }
 
 .products-grid {
@@ -1656,6 +1939,25 @@ textarea.form-control {
 
 /* Responsive */
 @media (max-width: 768px) {
+    .navbar-inner {
+        flex-direction: column;
+        align-items: stretch;
+        flex-wrap: wrap;
+        gap: 1rem;
+    }
+
+    .navbar-filter-box {
+        max-width: none;
+        order: 1;
+        margin: 0;
+    }
+
+    .navbar-search-input,
+    .navbar-category-select {
+        min-width: 0;
+        max-width: none;
+    }
+
     .cart-container,
     .checkout-container {
         grid-template-columns: 1fr;

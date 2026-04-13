@@ -19,6 +19,16 @@ instance/
 *.sqlite3
 *.db
 
+# Tableau / data exports
+*.hyper
+*.twb
+back-end/database/techshop_*_tableau*.csv
+back-end/database/techshop_*_tableau*.tsv
+back-end/database/techshop_*_analytics*.csv
+back-end/database/techshop_*_analytics*.tsv
+back-end/database/techshop_todo_tableau*.csv
+back-end/database/techshop_todo_tableau*.tsv
+
 # IDE
 .vscode/
 .idea/

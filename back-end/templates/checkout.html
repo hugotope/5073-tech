@@ -116,6 +116,23 @@
                 <small class="form-help">Mínim 10 caràcters</small>
             </div>
 
+            <!-- Ubicació per anàlisi geogràfica (Tableau Story) -->
+            <div class="form-group">
+                <label for="shipping_city">Ciutat *</label>
+                <input type="text" id="shipping_city" name="shipping_city" required
+                    class="form-control" placeholder="Barcelona">
+            </div>
+            <div class="form-group">
+                <label for="shipping_province">Província *</label>
+                <input type="text" id="shipping_province" name="shipping_province" required
+                    class="form-control" placeholder="Barcelona">
+            </div>
+            <div class="form-group">
+                <label for="shipping_country">País *</label>
+                <input type="text" id="shipping_country" name="shipping_country" required
+                    class="form-control" placeholder="Espanya">
+            </div>
+
             <div class="form-actions">
                 <button type="submit" class="btn btn-success btn-large">Confirmar Compra</button>
                 <a href="{{ url_for('cart') }}" class="btn btn-secondary">Tornar al Carretó</a>
@@ -159,6 +176,13 @@
         // Validar adreça (sempre necessària)
         if (address.length < 10) {
             errors.push('L\'adreça ha de tenir com a mínim 10 caràcters');
+        }
+
+        const city = document.getElementById('shipping_city').value.trim();
+        const province = document.getElementById('shipping_province').value.trim();
+        const country = document.getElementById('shipping_country').value.trim();
+        if (!city || !province || !country) {
+            errors.push('Has d\'introduir ciutat, província i país');
         }
 
         if (errors.length > 0) {

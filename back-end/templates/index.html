@@ -3,14 +3,28 @@
 {% block title %}Productes - TechShop{% endblock %}
 
 {% block content %}
+<section class="hero">
+    <div class="hero-content">
+        <h1 class="hero-title">Tecnologia a un clic</h1>
+        <p class="hero-subtitle">Descobreix els nostres productes electrònics amb les millors ofertes i recomanacions personalitzades.</p>
+    </div>
+</section>
+
 {% if recommended_products %}
-<div class="recommendations-section">
-    <h2>🌟 Recomanacions per a tu</h2>
-    <p class="subtitle">Productes que usuaris similars han comprat</p>
-    <div class="products-grid recommendations-grid">
+<details class="recommendations-dropdown">
+    <summary class="recommendations-dropdown-summary">
+        <span class="recommendations-dropdown-title">🌟 Recomanacions per a tu</span>
+        <span class="recommendations-dropdown-subtitle">Productes que usuaris similars han comprat</span>
+        <span class="recommendations-dropdown-arrow" aria-hidden="true"></span>
+    </summary>
+    <div class="recommendations-section recommendations-dropdown-content">
+        <div class="products-grid recommendations-grid">
         {% for product in recommended_products %}
         <div class="product-card recommended-card">
             <div class="product-info">
+                {% if product.category_id and category_by_id.get(product.category_id) %}
+                <span class="product-category">{{ category_by_id[product.category_id].name }}</span>
+                {% endif %}
                 <h3>{{ product.name }}</h3>
                 <p class="product-price">{{ "%.2f"|format(product.price) }} €</p>
                 <p class="product-stock">
@@ -45,14 +59,15 @@
         </div>
         {% endfor %}
     </div>
-    {% if sheets_configured %}
-    <div class="sheets-sync-actions">
-        <a href="{{ url_for('sync_recommendations_sheets') }}" class="btn btn-secondary">
-            📊 Enviar recomanacions i stock a Google Sheets
-        </a>
+        {% if sheets_configured %}
+        <div class="sheets-sync-actions">
+            <a href="{{ url_for('sync_recommendations_sheets') }}" class="btn btn-secondary">
+                📊 Enviar recomanacions i stock a Google Sheets
+            </a>
+        </div>
+        {% endif %}
     </div>
-    {% endif %}
-</div>
+</details>
 {% endif %}
 
 {% if sheets_configured and not recommended_products %}
@@ -64,13 +79,27 @@
 
 <div class="products-header">
     <h2>Productes Disponibles</h2>
-    <p class="subtitle">Descobreix els nostres productes electrònics</p>
+    <p class="subtitle">{% if search_query %}Resultats per "{{ search_query }}"{% elif current_category %}{{ current_category.name }}{% else %}Descobreix els nostres productes electrònics per categoria{% endif %}</p>
 </div>
+
+<div class="categories-filter">
+    <a href="{{ url_for('index', q=search_query or none) }}" class="category-pill {% if not current_category %}active{% endif %}">Totes</a>
+    {% for cat in categories %}
+    <a href="{{ url_for('index', category=cat.id, q=search_query or none) }}" class="category-pill {% if current_category and current_category.id == cat.id %}active{% endif %}">{{ cat.name }}</a>
+    {% endfor %}
+</div>
+
+{% if not products and (search_query or current_category) %}
+<p class="no-results">No s'han trobat productes. Prova amb una altra cerca o categoria.</p>
+{% endif %}
 
 <div class="products-grid">
     {% for product in products %}
     <div class="product-card">
         <div class="product-info">
+            {% if product.category_id and category_by_id.get(product.category_id) %}
+            <span class="product-category">{{ category_by_id[product.category_id].name }}</span>
+            {% endif %}
             <h3>{{ product.name }}</h3>
             <p class="product-price">{{ "%.2f"|format(product.price) }} €</p>
             <p class="product-stock">

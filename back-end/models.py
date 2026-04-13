@@ -16,29 +16,70 @@ from pathlib import Path
 
 
 @dataclass
+class Category:
+    """Model que representa una categoria de productes."""
+    id: int
+    name: str
+    slug: str
+
+    @staticmethod
+    def get_all(db_path: Path) -> List['Category']:
+        with sqlite3.connect(db_path) as conn:
+            conn.row_factory = sqlite3.Row
+            cur = conn.cursor()
+            cur.execute("SELECT * FROM Category ORDER BY name")
+            rows = cur.fetchall()
+            return [Category(**dict(row)) for row in rows]
+
+    @staticmethod
+    def get_by_id(category_id: int, db_path: Path) -> Optional['Category']:
+        with sqlite3.connect(db_path) as conn:
+            conn.row_factory = sqlite3.Row
+            cur = conn.cursor()
+            cur.execute("SELECT * FROM Category WHERE id = ?", (category_id,))
+            row = cur.fetchone()
+            if row:
+                return Category(**dict(row))
+            return None
+
+
+@dataclass
 class Product:
     """Model que representa un producte."""
     id: int
     name: str
     price: float
     stock: int
-    
+    category_id: int = 1
+    subcategory_id: Optional[int] = None
+
     @staticmethod
-    def get_all(db_path: Path) -> List['Product']:
-        """Obté tots els productes de la base de dades.
-        
-        Args:
-            db_path: ruta al fitxer de base de dades
-            
-        Returns:
-            Llista de productes
-        """
+    def get_all(
+        db_path: Path,
+        category_id: Optional[int] = None,
+        search_query: Optional[str] = None,
+    ) -> List['Product']:
+        """Obté tots els productes, opcionalment filtrats per categoria i/o nom."""
         with sqlite3.connect(db_path) as conn:
             conn.row_factory = sqlite3.Row
             cur = conn.cursor()
-            cur.execute("SELECT * FROM Product ORDER BY name")
+            sql = "SELECT * FROM Product WHERE 1=1"
+            params = []
+            if category_id:
+                sql += " AND category_id = ?"
+                params.append(category_id)
+            if search_query and search_query.strip():
+                sql += " AND name LIKE ?"
+                params.append(f"%{search_query.strip()}%")
+            sql += " ORDER BY name"
+            cur.execute(sql, params)
             rows = cur.fetchall()
-            return [Product(**dict(row)) for row in rows]
+            out = []
+            for row in rows:
+                d = dict(row)
+                d.setdefault("category_id", 1)
+                out.append(Product(**d))
+            return out
     
     @staticmethod
     def get_by_id(product_id: int, db_path: Path) -> Optional['Product']:
@@ -57,7 +98,9 @@ class Product:
             cur.execute("SELECT * FROM Product WHERE id = ?", (product_id,))
             row = cur.fetchone()
             if row:
-                return Product(**dict(row))
+                d = dict(row)
+                d.setdefault("category_id", 1)
+                return Product(**d)
             return None
     
     def update_stock(self, new_stock: int, db_path: Path) -> bool:
@@ -88,6 +131,7 @@ class UserAccount:
     password_hash: str
     email: str
     created_at: str
+    segment: Optional[str] = None
     
     @staticmethod
     def create(username: str, password_hash: str, email: str, db_path: Path) -> int:
@@ -131,7 +175,9 @@ class UserAccount:
             cur.execute("SELECT * FROM UserAccount WHERE username = ?", (username,))
             row = cur.fetchone()
             if row:
-                return UserAccount(**dict(row))
+                d = dict(row)
+                d.setdefault("segment")
+                return UserAccount(**d)
             return None
     
     @staticmethod
@@ -167,24 +213,38 @@ class Order:
     total: float
     created_at: str
     user_id: int
-    
+    shipping_city: Optional[str] = None
+    shipping_province: Optional[str] = None
+    shipping_country: Optional[str] = None
+
     @staticmethod
-    def create(total: float, user_id: int, db_path: Path) -> int:
+    def create(
+        total: float,
+        user_id: int,
+        db_path: Path,
+        shipping_city: Optional[str] = None,
+        shipping_province: Optional[str] = None,
+        shipping_country: Optional[str] = None,
+    ) -> int:
         """Crea una nova comanda.
-        
+
         Args:
             total: total de la comanda
             user_id: ID de l'usuari
             db_path: ruta al fitxer de base de dades
-            
+            shipping_city: ciutat d'enviament (per anàlisi geogràfica)
+            shipping_province: província
+            shipping_country: país
+
         Returns:
             ID de la nova comanda creada
         """
         with sqlite3.connect(db_path) as conn:
             cur = conn.cursor()
             cur.execute(
-                "INSERT INTO \"Order\" (total, user_id) VALUES (?, ?)",
-                (total, user_id)
+                """INSERT INTO "Order" (total, user_id, shipping_city, shipping_province, shipping_country)
+                   VALUES (?, ?, ?, ?, ?)""",
+                (total, user_id, shipping_city, shipping_province, shipping_country),
             )
             conn.commit()
             return cur.lastrowid
@@ -206,7 +266,11 @@ class Order:
             cur.execute("SELECT * FROM \"Order\" WHERE id = ?", (order_id,))
             row = cur.fetchone()
             if row:
-                return Order(**dict(row))
+                d = dict(row)
+                d.setdefault("shipping_city")
+                d.setdefault("shipping_province")
+                d.setdefault("shipping_country")
+                return Order(**d)
             return None
 
 

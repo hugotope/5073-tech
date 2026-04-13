@@ -36,9 +36,17 @@ def calculate_order_total(cart: Dict[str, int], db_path: Path) -> float:
     return total
 
 
-def create_order(cart: Dict[str, int], db_path: Path, 
-                 user_id: int = None, username: str = None, 
-                 password: str = None, email: str = None) -> int:
+def create_order(
+    cart: Dict[str, int],
+    db_path: Path,
+    user_id: int = None,
+    username: str = None,
+    password: str = None,
+    email: str = None,
+    shipping_city: str = None,
+    shipping_province: str = None,
+    shipping_country: str = None,
+) -> int:
     """Crea una comanda i actualitza l'inventari.
     
     Aquesta funció encapçala tota la lògica de creació d'una comanda:
@@ -118,8 +126,15 @@ def create_order(cart: Dict[str, int], db_path: Path,
                 else:
                     user_id = user.id
             
-            # Crea la comanda
-            order_id = Order.create(total, user_id, db_path)
+            # Crea la comanda (amb ubicació per anàlisi geogràfica / Tableau)
+            order_id = Order.create(
+                total,
+                user_id,
+                db_path,
+                shipping_city=shipping_city,
+                shipping_province=shipping_province,
+                shipping_country=shipping_country,
+            )
             
             # Crea els elements de la comanda i actualitza l'inventari
             for product_id, quantity in cart.items():

@@ -9,8 +9,20 @@
 </head>
 <body>
     <nav class="navbar">
-        <div class="container">
-            <h1 class="logo">🛒 TechShop</h1>
+        <div class="container navbar-inner">
+            <a href="{{ url_for('index') }}" class="logo">🛒 TechShop</a>
+            <div class="navbar-filter-box">
+                <form class="navbar-search" action="{{ url_for('index') }}" method="get" role="search">
+                    <input type="search" name="q" value="{{ navbar_q }}" class="navbar-search-input" placeholder="Cercar..." aria-label="Cercar productes">
+                    <select name="category" class="navbar-category-select" aria-label="Filtrar per categoria">
+                        <option value="">Totes</option>
+                        {% for cat in navbar_categories %}
+                        <option value="{{ cat.id }}" {% if navbar_category == cat.id|string %}selected{% endif %}>{{ cat.name }}</option>
+                        {% endfor %}
+                    </select>
+                    <button type="submit" class="navbar-search-btn">Cercar</button>
+                </form>
+            </div>
             <div class="nav-links">
                 <a href="{{ url_for('index') }}">Productes</a>
                 <a href="{{ url_for('cart') }}">Carretó</a>

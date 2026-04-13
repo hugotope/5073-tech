@@ -9,7 +9,7 @@ Passos per preparar les dades i crear la Story a Tableau (tasca individual).
 - **Ubicacions**: les comandes tenen `shipping_city`, `shipping_province`, `shipping_country` (per mapes).
 - **Perfil d'usuari**: `UserAccount.segment` (Professional, Aficionat, Educació).
 
-## 2. Exportar dades per a Tableau
+## 2. Omplir dades i exportar per a Tableau
 
 Des de la carpeta `back-end/database`:
 
@@ -17,16 +17,20 @@ Des de la carpeta `back-end/database`:
 # Si encara no l'has fet: migració que afegeix Subcategoria, segment i ubicacions
 python3 migrate_tableau_dataset.py
 
-# Exporta un CSV amb una fila per línia de comanda (vendes)
+# Opcional però recomanat: afegir moltes comandes amb productes de TOTES les categories
+# (sense això, els gràfics per Category Name poden mostrar només una categoria)
+python3 seed_orders_all_categories.py
+
+# Exporta tot en un sol fitxer
 python3 export_tableau_csv.py
 ```
 
-Es generen **`techshop_vendes_para_tableau.csv`** i **`techshop_vendes_para_tableau.tsv`** (recomanat per Tableau) a la mateixa carpeta.
+Es generen **techshop_todo_tableau.csv** i **techshop_todo_tableau.tsv** (recomanat). Una fila = una línia de comanda, amb **48 columnes** (comanda, ubicació, usuari, producte, subcategoria, categoria, price_tier, rànquings, etc.). Números amb punt decimal, dates YYYY-MM-DD.
 
 ## 3. Connexió a Tableau
 
 - Obre **Tableau Desktop** o **Tableau Public**.
-- **Connectar** → **Fitxer de text** → tria `techshop_vendes_para_tableau.tsv` i com a delimitador **Tab** (o el CSV amb **Punto y coma**).
+- **Connectar** → **Fitxer de text** → tria `techshop_todo_tableau.tsv` i com a delimitador **Tab** (o el CSV amb **Punto y coma**).
 - Assegura’t que Tableau reconeix:
   - **order_date** com a data.
   - **shipping_country**, **shipping_province**, **shipping_city** per a mapes (geografia).

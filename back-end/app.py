@@ -26,7 +26,7 @@ from datetime import datetime
 import sqlite3
 
 # Importem models
-from models import Product, Order, OrderItem, UserAccount
+from models import Product, Order, OrderItem, UserAccount, Category
 from controllers import cart_controller
 from controllers import order_controller
 from controllers import recommendation_controller
@@ -46,26 +46,50 @@ DB_PATH = Path(__file__).parent / "database" / "db.sqlite3"
 
 
 @app.context_processor
-def inject_sheets_config():
-    """Inyecta en tots els templates si Google Sheets està configurat."""
-    return {"sheets_configured": is_sheets_configured()}
+def inject_global_template_vars():
+    """Inyecta en tots els templates: Google Sheets, categories (per navbar) i paràmetres de cerca."""
+    data = {"sheets_configured": is_sheets_configured()}
+    try:
+        data["navbar_categories"] = Category.get_all(DB_PATH)
+    except sqlite3.OperationalError:
+        data["navbar_categories"] = []
+    data["navbar_q"] = request.args.get("q", "").strip() if request else ""
+    data["navbar_category"] = request.args.get("category", "") if request else ""
+    return data
 
 
 @app.route('/')
 def index():
     """Pàgina principal que mostra la llista de productes i recomanacions."""
-    products = Product.get_all(DB_PATH)
-    
-    # Obtenir recomanacions
-    # Intentem obtenir user_id de la sessió si existeix
+    category_id = request.args.get('category', type=int)
+    search_query = request.args.get('q', '').strip() or request.args.get('search', '').strip()
+    try:
+        categories = Category.get_all(DB_PATH)
+        category_by_id = {c.id: c for c in categories}
+        current_category = Category.get_by_id(category_id, DB_PATH) if category_id else None
+        products = Product.get_all(
+            DB_PATH, category_id=category_id, search_query=search_query or None
+        )
+    except sqlite3.OperationalError:
+        categories = []
+        category_by_id = {}
+        current_category = None
+        products = Product.get_all(DB_PATH)
+
     user_id = session.get('user_id', None)
     recommended_products = recommendation_controller.get_recommended_products(
         user_id, DB_PATH, limit=5
     )
-    
-    return render_template('index.html', 
-                         products=products, 
-                         recommended_products=recommended_products)
+
+    return render_template(
+        'index.html',
+        products=products,
+        recommended_products=recommended_products,
+        categories=categories,
+        category_by_id=category_by_id,
+        current_category=current_category,
+        search_query=search_query,
+    )
 
 
 @app.route('/sync-recommendations-sheets', methods=['GET', 'POST'])
@@ -371,9 +395,12 @@ def checkout():
                              is_authenticated=bool(user_id))
     
     else:  # POST
-        # Obtenim les dades del formulari
+        # Obtenim les dades del formulari (adreça i ubicació per Tableau/mapes)
         shipping_address = request.form.get('shipping_address', '').strip()
-        
+        shipping_city = request.form.get('shipping_city', '').strip() or None
+        shipping_province = request.form.get('shipping_province', '').strip() or None
+        shipping_country = request.form.get('shipping_country', '').strip() or None
+
         # Verificar si l'usuari està autenticat
         user_id = session.get('user_id')
         is_authenticated = bool(user_id)
@@ -401,7 +428,7 @@ def checkout():
         errors = errors if not is_authenticated else []
         if not shipping_address:
             errors.append('Has d\'introduir una adreça d\'enviament')
-        
+
         if errors:
             for error in errors:
                 flash(error, 'error')
@@ -413,40 +440,44 @@ def checkout():
         if not cart_items:
             flash('El carretó està buit', 'error')
             return redirect(url_for('index'))
-        
+
         try:
-            # Crear comanda
+            # Crear comanda (amb ubicació per mapes / Tableau Story)
             if is_authenticated:
-                # Usuari autenticat: usar el seu user_id
                 order_id = order_controller.create_order(
                     cart_items,
                     db_path=DB_PATH,
-                    user_id=user_id
+                    user_id=user_id,
+                    shipping_city=shipping_city,
+                    shipping_province=shipping_province,
+                    shipping_country=shipping_country,
                 )
             else:
-                # Usuari no autenticat: crear o obtenir usuari
                 order_id = order_controller.create_order(
                     cart_items,
                     db_path=DB_PATH,
                     username=username,
                     password=password,
-                    email=email
+                    email=email,
+                    shipping_city=shipping_city,
+                    shipping_province=shipping_province,
+                    shipping_country=shipping_country,
                 )
-                
-                # Guardar user_id a la sessió per a recomanacions
-                user = UserAccount.get_by_username(username, DB_PATH)
-                if user:
-                    session['user_id'] = user.id
-                    session['username'] = username
-            
+
+            # Guardar user_id a la sessió per a recomanacions
+            user = UserAccount.get_by_username(username, DB_PATH)
+            if user:
+                session['user_id'] = user.id
+                session['username'] = username
+
             # Netegem el carretó
             session['cart'] = {}
             session.pop('cart', None)
-            
+
             flash(f'Comanda realitzada amb èxit! ID de comanda: {order_id}', 'success')
             # Redirigir a la factura
             return redirect(url_for('invoice', order_id=order_id))
-            
+
         except Exception as e:
             flash(f'Error al processar la comanda: {str(e)}', 'error')
             return redirect(url_for('checkout'))
