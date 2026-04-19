@@ -10,6 +10,27 @@
     </div>
 </section>
 
+{% if sheets_configured %}
+<section class="sheets-callout" aria-label="Sincronització amb Google Sheets">
+    <div class="sheets-callout-inner">
+        <div>
+            <h2 class="sheets-callout-title">📊 Google Sheets</h2>
+            <p class="sheets-callout-text">
+                Aquí pots enviar el <strong>llistat de recomanacions</strong> (productes similars als que compres) i el seu <strong>stock</strong> al full de Google Sheets.
+                <span class="sheets-callout-note">Nota: no és l’historial de comandes complet.</span>
+            </p>
+        </div>
+        <a
+            href="{{ url_for('sync_recommendations_sheets') }}"
+            class="btn btn-secondary"
+            onclick="return confirm('Vols enviar ara el llistat de recomanacions i stock a Google Sheets?');"
+        >
+            Enviar ara a Google Sheets
+        </a>
+    </div>
+</section>
+{% endif %}
+
 {% if recommended_products %}
 <details class="recommendations-dropdown">
     <summary class="recommendations-dropdown-summary">
@@ -61,7 +82,11 @@
     </div>
         {% if sheets_configured %}
         <div class="sheets-sync-actions">
-            <a href="{{ url_for('sync_recommendations_sheets') }}" class="btn btn-secondary">
+            <a
+                href="{{ url_for('sync_recommendations_sheets') }}"
+                class="btn btn-secondary"
+                onclick="return confirm('Vols enviar ara el llistat de recomanacions i stock a Google Sheets?');"
+            >
                 📊 Enviar recomanacions i stock a Google Sheets
             </a>
         </div>
@@ -73,7 +98,13 @@
 {% if sheets_configured and not recommended_products %}
 <div class="recommendations-section">
     <p class="subtitle">Sincronitza els productes més populars i el stock amb Google Sheets.</p>
-    <a href="{{ url_for('sync_recommendations_sheets') }}" class="btn btn-secondary">📊 Enviar llistat a Google Sheets</a>
+    <a
+        href="{{ url_for('sync_recommendations_sheets') }}"
+        class="btn btn-secondary"
+        onclick="return confirm('Vols enviar ara el llistat (populars) i stock a Google Sheets?');"
+    >
+        📊 Enviar llistat a Google Sheets
+    </a>
 </div>
 {% endif %}
 

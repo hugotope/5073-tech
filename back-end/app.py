@@ -35,6 +35,7 @@ from controllers import invoice_controller
 from controllers import order_history_controller
 from services.sheets_sync_service import (
     sync_recommended_products_to_sheets,
+    sync_order_invoice_to_sheets,
     is_sheets_configured,
 )
 
@@ -110,7 +111,8 @@ def sync_recommendations_sheets():
             flash(f"Obre el document: {url}", 'info')
     else:
         flash(message, 'error')
-    return redirect(url_for('index'))
+    # Query param per mostrar un avís explícit a la UI després de la redirecció
+    return redirect(url_for('index', sheets_sync='1' if success else '0'))
 
 
 @app.route('/cart')
@@ -354,6 +356,45 @@ def invoice(order_id):
                          current_year=current_year)
 
 
+@app.route('/invoice/<int:order_id>/export-sheets', methods=['GET'])
+def export_invoice_to_sheets(order_id):
+    """Exporta la comanda (línies comprades) a Google Sheets (append, sense esborrar recomanacions)."""
+    if not is_sheets_configured():
+        flash("Google Sheets no està configurat (falta GOOGLE_APPLICATION_CREDENTIALS).", "error")
+        return redirect(url_for('invoice', order_id=order_id))
+
+    invoice_data = invoice_controller.get_invoice_data(order_id, DB_PATH)
+    if invoice_data is None:
+        flash('La comanda no existeix', 'error')
+        return redirect(url_for('index'))
+
+    # Permisos:
+    # - Si la comanda té usuari: només el propietari autenticat
+    # - Si no hi ha sessió: només just després del checkout (last_invoice_order_id)
+    uid = session.get('user_id')
+    user = invoice_data.get('user')
+    last_oid = session.get('last_invoice_order_id')
+
+    if user:
+        if not uid or int(uid) != int(user.id):
+            flash('Has d\'iniciar sessió com a propietari de la comanda per exportar-la a Google Sheets.', 'error')
+            return redirect(url_for('login'))
+    else:
+        if not last_oid or int(last_oid) != int(order_id):
+            flash('No tens permís per exportar aquesta comanda', 'error')
+            return redirect(url_for('index'))
+
+    success, message, url = sync_order_invoice_to_sheets(invoice_data, create_if_missing=True)
+    if success:
+        flash(message, 'success')
+        if url:
+            flash(f"Obre el document: {url}", 'info')
+    else:
+        flash(message, 'error')
+
+    return redirect(url_for('invoice', order_id=order_id, sheets_sync='1' if success else '0'))
+
+
 @app.route('/checkout', methods=['GET', 'POST'])
 def checkout():
     """Pàgina de finalització de compra.
@@ -475,6 +516,8 @@ def checkout():
             session.pop('cart', None)
 
             flash(f'Comanda realitzada amb èxit! ID de comanda: {order_id}', 'success')
+            # Permet exportar la comanda a Sheets just després de la compra (sense exposar IDs aleatoris)
+            session['last_invoice_order_id'] = int(order_id)
             # Redirigir a la factura
             return redirect(url_for('invoice', order_id=order_id))
 

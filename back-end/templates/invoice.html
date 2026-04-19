@@ -7,6 +7,23 @@
     <div class="invoice-header">
         <div class="invoice-actions">
             <button onclick="window.print()" class="btn btn-primary">Imprimir Factura</button>
+            {% if sheets_configured and invoice_data.user and session.get('user_id') == invoice_data.user.id %}
+                <a
+                    href="{{ url_for('export_invoice_to_sheets', order_id=invoice_data.order_id) }}"
+                    class="btn btn-secondary"
+                    onclick="return confirm('Vols enviar aquesta comanda (línies comprades) a Google Sheets?');"
+                >
+                    📊 Enviar compra a Google Sheets
+                </a>
+            {% elif sheets_configured and (not invoice_data.user) and (session.get('last_invoice_order_id') == invoice_data.order_id) %}
+                <a
+                    href="{{ url_for('export_invoice_to_sheets', order_id=invoice_data.order_id) }}"
+                    class="btn btn-secondary"
+                    onclick="return confirm('Vols enviar aquesta comanda (línies comprades) a Google Sheets?');"
+                >
+                    📊 Enviar compra a Google Sheets
+                </a>
+            {% endif %}
             <a href="{{ url_for('index') }}" class="btn btn-secondary">Tornar a Productes</a>
         </div>
     </div>

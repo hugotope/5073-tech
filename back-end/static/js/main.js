@@ -1,6 +1,25 @@
 /* TechShop - JavaScript per validacions del client i millores UX */
 
 document.addEventListener('DOMContentLoaded', function() {
+    // Avis explícit després de sincronitzar amb Google Sheets (redirect amb ?sheets_sync=1)
+    try {
+        const params = new URLSearchParams(window.location.search);
+        const sheetsSync = params.get('sheets_sync');
+        if (sheetsSync === '1') {
+            window.alert('Sincronització amb Google Sheets completada. Revisa el missatge superior (flash) per veure el detall i l’enllaç del document.');
+        } else if (sheetsSync === '0') {
+            window.alert('No s’ha pogut sincronitzar amb Google Sheets. Revisa el missatge d’error superior (flash).');
+        }
+
+        if (sheetsSync === '1' || sheetsSync === '0') {
+            params.delete('sheets_sync');
+            const qs = params.toString();
+            const newUrl = `${window.location.pathname}${qs ? `?${qs}` : ''}${window.location.hash}`;
+            window.history.replaceState({}, '', newUrl);
+        }
+    } catch (e) {
+        // noop
+    }
     
     // Validació de quantitat en els productes
     const quantityInputs = document.querySelectorAll('.quantity-input');
@@ -58,13 +77,21 @@ document.addEventListener('DOMContentLoaded', function() {
     const flashMessages = document.querySelectorAll('.flash-message');
     
     flashMessages.forEach(message => {
+        const text = (message.textContent || '').toLowerCase();
+        const isSheets =
+            text.includes('google sheets') ||
+            text.includes('sincronitz') ||
+            text.includes('sincroniz') ||
+            text.includes('spreadsheets.google.com');
+        const delayMs = isSheets ? 12000 : 5000;
+
         setTimeout(() => {
             message.style.opacity = '0';
             message.style.transition = 'opacity 0.5s';
             setTimeout(() => {
                 message.remove();
             }, 500);
-        }, 5000);
+        }, delayMs);
     });
     
 });
